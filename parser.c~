@@ -2,7 +2,6 @@
 #define MAX_INSTRUCTION_LENGTH 100
 
 /* Despues moverlo a un archivo con los defines */
-/*Alan*/
 
 #include <stdio.h>
 #include <stdlib.h>
