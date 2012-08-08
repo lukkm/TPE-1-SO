@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Data_Structures/stack.h"
 #include "defs.h"
 
 char * command_list[CANT_INSTRUCTIONS];
