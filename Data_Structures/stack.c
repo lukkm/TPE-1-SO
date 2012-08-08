@@ -7,7 +7,7 @@ stack_t create_stack(){
 	return calloc(sizeof(struct stack));
 }
 
-int push(stack_t stack, node_t info){
+int push(stack_t stack, void * info){
 	if (stack == NULL)
 		return -1;
 

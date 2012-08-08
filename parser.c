@@ -1,12 +1,11 @@
-#define CANT_INSTRUCTIONS 9
-#define MAX_INSTRUCTION_LENGTH 100
-
 /* Despues moverlo a un archivo con los defines */
 /*Alan*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "defs.h"
 
 char * command_list[CANT_INSTRUCTIONS];
 void (* functions_list[CANT_INSTRUCTIONS]) (char *);
@@ -22,8 +21,6 @@ void set_lists(){
 	command_list[7] = "WHILE";
 	command_list[8] = "ENDWHILE";
 
-	/* Faltan hacer las funciones 
-
 	functions_list[0] = &parse_inc
 	functions_list[1] = &parse_dec
 	functions_list[2] = &parse_mr
@@ -33,9 +30,6 @@ void set_lists(){
 	functions_list[6] = &parse_endif
 	functions_list[7] = &parse_while
 	functions_list[8] = &parse_endwhile
-
-	*/
-
 }
 
 void select_instruction(char * instr){
@@ -100,7 +94,7 @@ void parse_if(char * instr){
 
 void parse_endif(char * instr){
 	int num;
-	if (sscanf(instr, "ENDIF(%d,%s)", &num)){
+	if (sscanf(instr, "ENDIF(%d)", &num)){
 		/* exec_endif(num); */
 	}
 }
@@ -115,7 +109,7 @@ void parse_while(char * instr){
 
 void parse_endwhile(char * instr){
 	int num;
-	if (sscanf(instr, "ENDWHILE(%d,%s)", &num)){
+	if (sscanf(instr, "ENDWHILE(%d)", &num)){
 		/* exec_endwhile(num); */
 	}
 }

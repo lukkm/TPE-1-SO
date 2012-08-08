@@ -3,12 +3,12 @@
 struct stack{
 	stack_node first;
 	int size;
-}
+};
 typedef stack * stack_t;
 
 struct node{
 	stack_node next;
-	node_t info;
+	void * info;
 	/* Informacion del nodo, puede ser process_t o node_t */
 }; 
 
