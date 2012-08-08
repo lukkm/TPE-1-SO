@@ -25,6 +25,7 @@ stack_t parse_file(char * file_adress){
 		if (select_instruction(line, stack) == -1)
 			return NULL;
 	}
+	return stack;
 }
 
 void set_lists(){
@@ -118,9 +119,8 @@ int parse_ml(char * instr, stack_t stack, instruction_t new_instr){
 
 int parse_cz(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
-	if (sscanf(instr, "CZ(%d)", &num)){
+	if (sscanf(instr, "CZ")){
 		/* new_instr->instruction_type = cz_process; */
-		new_instr->param = num;
 		if (push(stack, new_instr) == -1)
 			return -1;
 	}else{

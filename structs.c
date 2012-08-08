@@ -7,7 +7,6 @@ typedef struct program * program_t;
 
 struct process{
 	/* Info de la IPC */
-	int conditional;
 	int type;
 };
 typedef struct process * process_t;
