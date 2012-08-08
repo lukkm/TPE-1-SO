@@ -15,7 +15,7 @@ struct node{
 typedef struct node * stack_node;
 
 stack_t create_stack();
-int push(stack_node stack, node_t node);
+int push(stack_node stack, void * node);
 stack_node pop(stack_t stack);
-int isEmpty(stack_t stack);
+int is_empty(stack_t stack);
 

@@ -2,7 +2,7 @@
 
 typedef struct graph_node * node_t;
 struct graph_node{
-	process_t instruction_process;
+	instruction_t instruction_process;
 	node_t true_node;
 	node_t false_node;
 };
