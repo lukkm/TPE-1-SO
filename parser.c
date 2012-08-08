@@ -7,9 +7,25 @@
 
 #include "Data_Structures/stack.h"
 #include "defs.h"
+#include "stack.h"
+/* Include "processes.h" */
 
 char * command_list[CANT_INSTRUCTIONS];
 void (* functions_list[CANT_INSTRUCTIONS]) (char *);
+
+stack_t parse_file(char * file_adress){
+	FILE * file;
+	file = fopen(file_adress, "r");
+	if (file == NULL)
+		return NULL;
+	stack_t stack = create_stack();
+	char * line;	
+	while(!feof(file)){
+		line = fscanf("[^\n]");
+		if (select_instruction(line, stack) == -1)
+			return NULL;
+	}
+}
 
 void set_lists(){
 	command_list[0] = "Inc";
@@ -33,7 +49,7 @@ void set_lists(){
 	functions_list[8] = &parse_endwhile
 }
 
-void select_instruction(char * instr){
+int select_instruction(char * instr, stack_t stack){
 	
 	int i, cmd_length;
 
@@ -41,77 +57,126 @@ void select_instruction(char * instr){
 		for(i = 0; i < CANT_INSTRUCTIONS; i++){
 			cmd_length = strlen(command_list[i]);
 			if (!strncmp(instr,command_list[i], cmd_length)){
-				functions_list[i](instr);
-				return;
+				instruction_t new_instr = calloc(sizeof(struct instruction));
+				if (new_instr == NULL)
+					return -1;
+				return functions_list[i](instr, stack, new_instr);
 			}
 		}
 	}
-
+	return -1;
 }
 
 
-void parse_inc(char * instr){
+int parse_inc(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "Inc(%d)", &num)){
-		/* exec_inc(num); */
+		/* new_instr->instruction_type = inc_process; */
+		new_instr->param = num;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_dec(char * instr){
+int parse_dec(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "Dec(%d)", &num)){
-		/* exec_dec(num); */
+		/* new_instr->instruction_type = dec_process; */
+		new_instr->param = num;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_mr(char * instr){
+int parse_mr(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "MR(%d)", &num)){
-		/* exec_mr(num); */
+		/* new_instr->instruction_type = mr_process; */
+		new_instr->param = num;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_ml(char * instr){
+int parse_ml(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "ML(%d)", &num)){
-		/* exec_ml(num); */
+		/* new_instr->instruction_type = ml_process; */
+		new_instr->param = num;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_cz(char * instr){
+int parse_cz(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "CZ(%d)", &num)){
-		/* exec_cz(num); */
+		/* new_instr->instruction_type = cz_process; */
+		new_instr->param = num;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_if(char * instr){
+int parse_if(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
-	char new_instr[MAX_INSTRUCTION_LENGTH];
-	if (sscanf(instr, "IF(%d,%s)", &num, new_instr)){
-		/* exec_if(num, new_instr); */
+	char expr[MAX_INSTRUCTION_LENGTH];
+	if (sscanf(instr, "IF(%d,%s)", &num, expr) == 2){
+		/* new_instr->instruction_type = if_process; */
+		new_instr->param = num;
+		new_instr->expr = expr;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_endif(char * instr){
+int parse_endif(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "ENDIF(%d)", &num)){
-		/* exec_endif(num); */
+		/* new_instr->instruction_type = endif_process; */
+		new_instr->param = num;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_while(char * instr){
+int parse_while(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
-	char new_instr[MAX_INSTRUCTION_LENGTH];
-	if (sscanf(instr, "WHILE(%d,%s)", &num, new_instr)){
-		/* exec_while(num, new_instr); */
+	char expr[MAX_INSTRUCTION_LENGTH];
+	if (sscanf(instr, "WHILE(%d,%s)", &num, expr) == 2){
+		/* new_instr->instruction_type = while_process; */
+		new_instr->param = num;
+		new_instr->expr = expr;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
-void parse_endwhile(char * instr){
+int parse_endwhile(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "ENDWHILE(%d)", &num)){
-		/* exec_endwhile(num); */
+		/* new_instr->instruction_type = endwhile_process; */
+		new_instr->param = num;
+		if (push(stack, new_instr) == -1)
+			return -1;
+	}else{
+		return -1;
 	}
 }
 
