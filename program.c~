@@ -1,0 +1,6 @@
+#define MEM_SIZE 1000
+
+struct program{
+	int memory[MEM_SIZE];
+	int variable;
+}
