@@ -57,9 +57,15 @@ typedef struct status{
 
 typedef struct process_params   /*Estructura necesaria para los threads, se carga en base a las IPC's*/
 {
-	status c_status;
+	struct status * c_status;
 	int param;
 } process_params;
+
+typedef struct ipc_params{
+	char * file;
+	int action;
+	int fd;
+} ipc_params;
 
 
 typedef process_params * process_params_t;

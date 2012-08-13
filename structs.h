@@ -61,6 +61,12 @@ typedef struct process_params   /*Estructura necesaria para los threads, se carg
 	int param;
 } process_params;
 
+typedef struct ipc_params{
+	char * file;
+	int action;
+	int fd;
+} ipc_params;
+
 
 typedef process_params * process_params_t;
 typedef program * program_t;
@@ -71,3 +77,4 @@ typedef node * stack_node;
 typedef graph_node * node_t;
 typedef graph * graph_t;
 typedef status * status_t;
+typedef ipc_params * ipc_params_t;
