@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "structs.h"
 #include "parser.h"
+#include "defs.h"
 #include "Data_Structures/graph.h"
 #include "Data_Structures/stack.h"
 
@@ -48,7 +50,7 @@ main(void)
 		}while(c_g_node != NULL);
 
 	}else{
-		printf("Escribi bien, pelotudo");
+		printf("Escribi bien, pelotudo\n");
 	}
 		
 
@@ -57,15 +59,15 @@ main(void)
 
 void init(){
 
-	inc_process = calloc(sizeof(struct process));
-	dec_process = calloc(sizeof(struct process));
-	mr_process = calloc(sizeof(struct process));
-	ml_process = calloc(sizeof(struct process));
-	cz_process = calloc(sizeof(struct process));
-	if_process = calloc(sizeof(struct process));
-	endif_process = calloc(sizeof(struct process));
-	while_process = calloc(sizeof(struct process));
-	endwhile_process = calloc(sizeof(struct process));
+	inc_process = calloc(1, sizeof(struct process));
+	dec_process = calloc(1, sizeof(struct process));
+	mr_process = calloc(1, sizeof(struct process));
+	ml_process = calloc(1, sizeof(struct process));
+	cz_process = calloc(1, sizeof(struct process));
+	if_process = calloc(1, sizeof(struct process));
+	endif_process = calloc(1, sizeof(struct process));
+	while_process = calloc(1, sizeof(struct process));
+	endwhile_process = calloc(1, sizeof(struct process));
 
 	inc_process->type = INC;
 	dec_process->type = DEC;

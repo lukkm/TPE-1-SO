@@ -4,7 +4,7 @@
 #include "../defs.h"
 
 int pre_execute(process_params_t);
-void* execute_if (void*);
+void * execute_if (void *);
 
 
 int pre_execute(process_params_t params)
@@ -29,10 +29,12 @@ int main(void)
 }
 
 
-void* execute_if (void* structure_params)
+void * execute_if (void * structure_params)
 {
 	process_params_t par = (process_params_t) structure_params;
 	
+	structure_params
+
 	printf("WTF \n");
 	return NULL;
 }

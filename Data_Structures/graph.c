@@ -18,6 +18,7 @@ graph_t build_graph(stack_t instructions)
     instruction_t new_instruction;
     
     int new_node_type;
+    int aux_node_type;
 
     if(instructions == NULL){
     	return NULL;
@@ -41,10 +42,12 @@ graph_t build_graph(stack_t instructions)
         {
             ending_node = pop(aux_node_stack);
 	    ending_graph_node = (node_t)ending_node->info;
+	    aux_node_type = ending_graph_node->
+				instruction_process->instruction_type->type;
             if (ending_graph_node->instruction_process->param != 
-                    new_node->instruction_process->param || 
-		ending_graph_node->instruction_process->instruction_type->type !=
-		new_node_type)
+                    new_node->instruction_process->param ||
+		aux_node_type == ENDIF && new_node_type != IF ||
+		aux_node_type == ENDWHILE && new_node_type != WHILE)
                 return NULL;
             new_node->false_node = ending_graph_node->true_node;
             if (new_node_type == WHILE)
