@@ -1,9 +1,0 @@
-process_t inc_process;
-process_t dec_process;
-process_t mr_process;
-process_t ml_process;
-process_t cz_process;
-process_t if_process;
-process_t endif_process;
-process_t while_process;
-process_t endwhile_process;
