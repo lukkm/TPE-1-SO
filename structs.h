@@ -14,11 +14,6 @@ typedef struct program{
 	int variable;
 } program;
 
-typedef struct process{
-	ipc_params_t params;
-	int type;
-} process;
-
 
 typedef struct instruction{
 	struct process * instruction_type;
@@ -66,6 +61,11 @@ typedef struct ipc_params{
 	int action;
 	int fd;
 } ipc_params;
+
+typedef struct process{
+	struct ipc_params * params;
+	int type;
+} process;
 
 
 typedef process_params * process_params_t;

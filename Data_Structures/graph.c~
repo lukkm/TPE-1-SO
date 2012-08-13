@@ -42,9 +42,7 @@ graph_t build_graph(stack_t instructions)
             ending_node = pop(aux_node_stack);
 	    ending_graph_node = (node_t)ending_node->info;
             if (ending_graph_node->instruction_process->param != 
-                    new_node->instruction_process->param || 
-		ending_graph_node->instruction_process->instruction_type->type !=
-		new_node_type)
+                    new_node->instruction_process->param)
                 return NULL;
             new_node->false_node = ending_graph_node->true_node;
             if (new_node_type == WHILE)
