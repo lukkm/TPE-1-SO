@@ -1,21 +1,42 @@
+#include "structs.h"
+
 struct program{
 	int * memory;
-	int current = 0;
+	int current;
 	int variable;
 };
-typedef struct program * program_t;
 
 struct process{
 	/* Info de la IPC */
 	int type;
 };
-typedef struct process * process_t;
+
 
 struct instruction {
 	process_t instruction_type;
 	int param;
 	char * expr;
 };
-typedef struct instruction * instruction_t;
 
+struct node{
+	struct node * next;
+	void * info;
+	/* Informacion del nodo, puede ser process_t o node_t */
+}; 
+
+struct stack{
+	struct node * first;
+	int size;
+};
+
+struct graph_node{
+	instruction_t instruction_process;
+	node_t true_node;
+	node_t false_node;
+};
+
+struct graph{
+	node_t first;
+	/* Mas informacion que pueda tener */
+};
 

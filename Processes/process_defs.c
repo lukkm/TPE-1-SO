@@ -1,26 +1,30 @@
-#include "../structs.c"
+#include "../structs.h"
 #include "../defs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
 
-process_t inc_process;
-process_t dec_process;
-process_t mr_process;
-process_t ml_process;
-process_t cz_process;
-process_t if_process;
-process_t endif_process;
-process_t while_process;
-process_t endwhile_process;
+extern process_t inc_process;
+extern process_t dec_process;
+extern process_t mr_process;
+extern process_t ml_process;
+extern process_t cz_process;
+extern process_t if_process;
+extern process_t endif_process;
+extern process_t while_process;
+extern process_t endwhile_process;
 
 void init(){
-	inc_process = calloc(sizeof(struct process));
-        dec_process = calloc(sizeof(struct process));
-	mr_process = calloc(sizeof(struct process));
-	ml_process = calloc(sizeof(struct process));
-	cz_process = calloc(sizeof(struct process));
-        if_process = calloc(sizeof(struct process));
-	endif_process = calloc(sizeof(struct process));
-	while_process = calloc(sizeof(struct process));
-	endwhile_process = calloc(sizeof(struct process));
+	inc_process = calloc(1, sizeof(struct process));
+        dec_process = calloc(1, sizeof(struct process));
+	mr_process = calloc(1, sizeof(struct process));
+	ml_process = calloc(1, sizeof(struct process));
+	cz_process = calloc(1, sizeof(struct process));
+        if_process = calloc(1, sizeof(struct process));
+	endif_process = calloc(1, sizeof(struct process));
+	while_process = calloc(1, sizeof(struct process));
+	endwhile_process = calloc(1, sizeof(struct process));
 
 	inc_process->type = INC;
 	dec_process->type = DEC;

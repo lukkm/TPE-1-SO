@@ -1,19 +1,4 @@
-#include "../structs.c"
-
-typedef struct graph_node * node_t;
-struct graph_node{
-	instruction_t instruction_process;
-	node_t true_node;
-	node_t false_node;
-};
-
-struct graph{
-	node_t first;
-	/* Mas informacion que pueda tener */
-};
-typedef graph * graph_t;
-
-graph_t build_graph();
+graph_t build_graph(stack_t instructions);
 
 
 
