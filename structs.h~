@@ -77,3 +77,4 @@ typedef node * stack_node;
 typedef graph_node * node_t;
 typedef graph * graph_t;
 typedef status * status_t;
+typedef ipc_params * ipc_params_t;

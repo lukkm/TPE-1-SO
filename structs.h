@@ -15,7 +15,7 @@ typedef struct program{
 } program;
 
 typedef struct process{
-	/* Info de la IPC */
+	ipc_params_t params;
 	int type;
 } process;
 
