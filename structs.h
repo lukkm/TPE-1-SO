@@ -46,6 +46,13 @@ typedef struct{
 	/* Mas informacion que pueda tener */
 } graph;
 
+typedef struct{
+	int cursor;
+	int mem[1000];
+	int flag;
+	int id;
+} status;
+
 typedef program * program_t;
 typedef process * process_t;
 typedef instruction * instruction_t;
@@ -53,3 +60,4 @@ typedef stack * stack_t;
 typedef node * stack_node;
 typedef graph_node * node_t;
 typedef graph * graph_t;
+typedef status * status_t;
