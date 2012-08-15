@@ -9,9 +9,10 @@ stack_t parse_string(char *);
 graph_t build_graph(stack_t instructions)
 {
     graph_t new_graph = (graph_t)calloc(1, sizeof(graph));
-    graph_t expr_graph = (graph_t)calloc(1, sizeof(graph));
+    graph_t expr_graph;
 
     stack_t aux_node_stack = (stack_t)calloc(1, sizeof(stack));
+    stack_t expr_stack;
 
     node_t new_node;
     node_t ending_graph_node;
@@ -24,14 +25,14 @@ graph_t build_graph(stack_t instructions)
     int new_node_type;
     int aux_node_type;
 
-    if(instructions == NULL){
+    if(instructions == NULL || is_empty(instructions)){
     	return NULL;
     }
     
     while (!is_empty(instructions))
     {
 
-	new_node = (node_t)calloc(1, sizeof(stack));
+	new_node = (node_t)calloc(1, sizeof(graph_node));
 
         aux_node = pop(instructions);
         new_instruction = (instruction_t)aux_node->info;
@@ -56,10 +57,12 @@ graph_t build_graph(stack_t instructions)
             new_node->false_node = ending_graph_node->true_node;
             if (new_node_type == WHILE)
                 ending_graph_node->true_node = new_node;
-	    expr_graph = build_graph(parse_string(new_instruction->expr));
+	    expr_stack = parse_string(new_instruction->expr);
+	    
+	    expr_graph = build_graph(expr_stack);
 	    if (expr_graph == NULL)
 		return NULL;
-	    new_node->conditional_expr = expr_graph->first;	
+	    new_node->conditional_expr = expr_graph->first;
         }
             
         new_graph->first = new_node;

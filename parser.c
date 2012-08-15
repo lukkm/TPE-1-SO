@@ -78,8 +78,8 @@ stack_t parse_string(char * string){
 	char line[MAX_INSTRUCTION_LENGTH];
 	stack_t cmd_stack = create_stack();
 	
-	while(!string[i]){
-		sscanf(string+i, "%s", line);
+	while(string[i]){
+		sscanf(string+i, "%s ", line);
 		size = strlen(line);
 		if (select_instruction(line, cmd_stack) == -1)
 			return NULL;
@@ -167,11 +167,15 @@ int parse_cz(char * instr, stack_t stack, instruction_t new_instr){
 }
 
 int parse_if(char * instr, stack_t stack, instruction_t new_instr){
-	int num;
-	char expr[MAX_INSTRUCTION_LENGTH];
-	if (sscanf(instr, "IF(%d,%s)", &num, expr) == 2){
+	int num, size;
+	char * pos;
+	char * expr = calloc(1, MAX_INSTRUCTION_LENGTH);
+	if (sscanf(instr, "IF(%d,", &num)){
 		new_instr->instruction_type = if_process;
 		new_instr->param = num;
+		pos = strchr(instr, ',') + 1;
+		expr = pos;
+		expr[strlen(expr)-1] = 0;
 		new_instr->expr = expr;
 		if (push(stack, new_instr) == -1)
 			return -1;
