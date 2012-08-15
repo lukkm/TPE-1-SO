@@ -4,6 +4,8 @@
 #include "../defs.h"
 #include <stdlib.h>
 
+stack_t parse_string(char *);
+
 graph_t build_graph(stack_t instructions)
 {
     graph_t new_graph = (graph_t)calloc(1, sizeof(graph));
