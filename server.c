@@ -30,15 +30,28 @@ main(void)
 	graph_t c_graph;
 	node_t c_g_node;
 
-	char read_string[MAX_PROGRAM_LENGTH];
+	char * read_string;
+	
+	client_header_t header = calloc(1, sizeof(struct client_header));
 
-	ipc_params_t server_params = calloc(1, sizeof(struct ipc_params));
+
+	ipc_params_t server_params = calloc(1,sizeof(struct ipc_params));
 	server_params->file = "/tmp/server";
 	ipc_create(server_params);
-	ipc_open(server_params, O_RDONLY|O_NONBLOCK);
+	ipc_open(server_params, O_RDONLY);
 	while(1){
-		if(ipc_receive(server_params, read_string, MAX_PROGRAM_LENGTH) > 0){
-			printf("%s \n", read_string);
+		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0){
+			
+			read_string = calloc(1, header->program_size);
+			
+			sleep(1);
+			
+			while(ipc_receive(server_params, read_string, header->program_size) == 0){
+				sleep(1);
+			} 
+
+			printf("%s", read_string);
+
 			c_stack = parse_file(read_string);
 
 			c_graph = build_graph(c_stack);
@@ -72,15 +85,22 @@ main(void)
 
 void init(){
 
-	inc_process = calloc(1, sizeof(struct process));
-	dec_process = calloc(1, sizeof(struct process));
-	mr_process = calloc(1, sizeof(struct process));
-	ml_process = calloc(1, sizeof(struct process));
-	cz_process = calloc(1, sizeof(struct process));
-	if_process = calloc(1, sizeof(struct process));
-	endif_process = calloc(1, sizeof(struct process));
-	while_process = calloc(1, sizeof(struct process));
-	endwhile_process = calloc(1, sizeof(struct process));
+	process_t * process_list[CANT_INSTRUCTIONS];
+	int i;
+
+	process_list[0] = &inc_process;
+	process_list[1] = &dec_process; 
+	process_list[2] = &mr_process;
+	process_list[3] = &ml_process;
+	process_list[4] = &cz_process;
+	process_list[5] = &if_process;
+	process_list[6] = &endif_process;
+	process_list[7] = &while_process; 
+	process_list[8] = &endwhile_process;
+
+	for (i = 0; i < CANT_INSTRUCTIONS; i++){
+		*(process_list[i]) = calloc(1, sizeof(struct process));
+	}
 
 	inc_process->type = INC;
 	dec_process->type = DEC;
@@ -91,4 +111,6 @@ void init(){
 	endif_process->type = ENDIF;
 	while_process->type = WHILE;	
 	endwhile_process->type = ENDWHILE;	
+
+	//create_processes();
 }

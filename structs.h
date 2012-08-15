@@ -58,15 +58,35 @@ typedef struct process_params   /*Estructura necesaria para los threads, se carg
 } process_params;
 
 typedef struct ipc_params{
+	
+	/*------------------*/
+
+	/* FIFO PARAMS */
 	char * file;
 	int action;
 	int fd;
+	
+	/*------------------*/
+
+	/* SHARED MEMORY PARAMS */
+	int shm_segment_size;
+	int segment_id;
+	char* shared_memory_address;
+	//char* msg;
+	
+	/*------------------*/
+	
 } ipc_params;
 
 typedef struct process{
 	struct ipc_params * params;
 	int type;
 } process;
+
+typedef struct client_header{
+	int client_id;
+	int program_size;
+} client_header;
 
 
 typedef process_params * process_params_t;
@@ -79,3 +99,4 @@ typedef graph_node * node_t;
 typedef graph * graph_t;
 typedef status * status_t;
 typedef ipc_params * ipc_params_t;
+typedef client_header * client_header_t;
