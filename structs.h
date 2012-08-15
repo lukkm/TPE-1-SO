@@ -58,9 +58,24 @@ typedef struct process_params   /*Estructura necesaria para los threads, se carg
 } process_params;
 
 typedef struct ipc_params{
+	
+	/*------------------*/
+
+	/* FIFO PARAMS */
 	char * file;
 	int action;
 	int fd;
+	
+	/*------------------*/
+
+	/* SHARED MEMORY PARAMS */
+	int shm_segment_size;
+	int segment_id;
+	char* shared_memory_address;
+	//char* msg;
+	
+	/*------------------*/
+	
 } ipc_params;
 
 typedef struct process{
