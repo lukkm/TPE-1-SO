@@ -83,6 +83,11 @@ typedef struct process{
 	int type;
 } process;
 
+typedef struct client_header{
+	int client_id;
+	int program_size;
+} client_header;
+
 
 typedef process_params * process_params_t;
 typedef program * program_t;
@@ -94,3 +99,4 @@ typedef graph_node * node_t;
 typedef graph * graph_t;
 typedef status * status_t;
 typedef ipc_params * ipc_params_t;
+typedef client_header * client_header_t;

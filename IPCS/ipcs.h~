@@ -1,5 +1,3 @@
-#include "../structs.h"
-
 void ipc_create(ipc_params_t params);
 void ipc_open(ipc_params_t params, int action);
 void ipc_close(ipc_params_t params);

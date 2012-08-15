@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
+#include <errno.h>
 
 #include "../structs.h"
 #include "ipcs.h"
@@ -14,8 +15,10 @@ fatal(char *s)
 }
 
 void ipc_create(ipc_params_t params){	
-	if ( mkfifo(params->file, 0666) == -1 )
-		fatal("Error mknod");
+	if ( mkfifo(params->file, 0666) == -1 ) {
+		if (errno != EEXIST)
+			fatal("Error mkfifo");
+	}
 }
 
 void ipc_open(ipc_params_t params, int action){
@@ -28,11 +31,11 @@ void ipc_close(ipc_params_t params){
 	close(params->fd);
 }
 
-void ipc_send(ipc_params_t params, char * message, int size){
+void ipc_send(ipc_params_t params, void * message, int size){
 	write(params->fd, message, size);
 }
 
 
-int ipc_receive(ipc_params_t params, char * buffer, int size){
+int ipc_receive(ipc_params_t params, void * buffer, int size){
 	return read(params->fd, buffer, size);
 }
