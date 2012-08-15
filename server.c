@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+
 
 #include "structs.h"
 #include "parser.h"
 #include "defs.h"
 #include "Data_Structures/graph.h"
 #include "Data_Structures/stack.h"
+#include "IPCS/ipcs.h"
 
 process_t inc_process;
 process_t dec_process;
@@ -22,14 +25,27 @@ void init(void);
 int
 main(void) 
 {
+	printf("hola");
 	init();
 	stack_t c_stack;
 	graph_t c_graph;
-
 	node_t c_g_node;
-	
-	c_stack = parse_file("hola");
 
+	char read_string[100];
+
+	ipc_params_t server_params = calloc(1, sizeof(struct ipc_params));
+	server_params->file = "/tmp/server";
+	ipc_create(server_params);
+	ipc_open(server_params, O_RDONLY|O_NONBLOCK);
+	while(1){
+		if(ipc_receive(server_params, read_string, 100) > 0){
+			printf("%s \n", read_string);
+		}
+		sleep(1);
+	}
+	
+	//c_stack = parse_file("hola");
+/*
 	c_graph = build_graph(c_stack);
 
 	if (c_graph != NULL){
@@ -53,7 +69,7 @@ main(void)
 		printf("Escribi bien, pelotudo\n");
 	}
 		
-
+*/
 	return 0;
 }
 

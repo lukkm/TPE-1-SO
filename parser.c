@@ -44,7 +44,7 @@ stack_t parse_file(char * file_adress){
 	stack_t stack = create_stack();
 	char line[MAX_INSTRUCTION_LENGTH];	
 	while(!feof(file)){
-		fscanf(file, "%s\n", line);
+		fscanf(file, "%s", line);
 		if (select_instruction(line, stack) == -1)
 			return NULL;
 	}

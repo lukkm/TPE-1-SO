@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
+#include "../structs.h"
 #include "ipcs.h"
 
 void
@@ -17,8 +13,8 @@ fatal(char *s)
 	exit(1);
 }
 
-void ipc_create(ipc_params_t params){
-	if ( mknod(params->file, S_IFIFO|0666, 0) == -1 )
+void ipc_create(ipc_params_t params){	
+	if ( mkfifo(params->file, 0666) == -1 )
 		fatal("Error mknod");
 }
 
