@@ -25,52 +25,48 @@ void init(void);
 int
 main(void) 
 {
-	printf("hola");
 	init();
 	stack_t c_stack;
 	graph_t c_graph;
 	node_t c_g_node;
 
-	char read_string[100];
+	char read_string[MAX_PROGRAM_LENGTH];
 
 	ipc_params_t server_params = calloc(1, sizeof(struct ipc_params));
 	server_params->file = "/tmp/server";
 	ipc_create(server_params);
 	ipc_open(server_params, O_RDONLY|O_NONBLOCK);
 	while(1){
-		printf("asadasd\n");
-		if(ipc_receive(server_params, read_string, 100) > 0){
+		if(ipc_receive(server_params, read_string, MAX_PROGRAM_LENGTH) > 0){
 			printf("%s \n", read_string);
+			c_stack = parse_file(read_string);
+
+			c_graph = build_graph(c_stack);
+
+			if (c_graph != NULL){
+
+				c_g_node = c_graph->first;
+
+				do{
+	
+					printf("%d ", c_g_node->instruction_process->instruction_type->type);
+					printf("%d\n", c_g_node->instruction_process->param);
+			
+					if (c_g_node->false_node != NULL){
+						printf("parte falsa del %d: %d\n", c_g_node->instruction_process->instruction_type->type, c_g_node->false_node->instruction_process->instruction_type->type);
+					}
+
+					c_g_node = c_g_node->true_node;
+				}while(c_g_node != NULL);
+
+			}else{
+				printf("Escribi bien, pelotudo\n");
+			}
 		}
 		sleep(1);
 	}
-	
-	//c_stack = parse_file("hola");
-/*
-	c_graph = build_graph(c_stack);
-
-	if (c_graph != NULL){
-
-		c_g_node = c_graph->first;
-
-		do{
-	
-			printf("%d ", c_g_node->instruction_process->instruction_type->type);
-			printf("%d\n", c_g_node->instruction_process->param);
-			
-			if (c_g_node->false_node != NULL){
-				printf("parte falsa del %d: %d\n", c_g_node->instruction_process->instruction_type->type, 
-								c_g_node->false_node->instruction_process->instruction_type->type);
-			}
-
-			c_g_node = c_g_node->true_node;
-		}while(c_g_node != NULL);
-
-	}else{
-		printf("Escribi bien, pelotudo\n");
-	}
 		
-*/
+
 	return 0;
 }
 

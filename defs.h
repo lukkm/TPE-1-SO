@@ -1,6 +1,7 @@
 #define CANT_INSTRUCTIONS 9
 #define MAX_INSTRUCTION_LENGTH 100
 #define MEM_SIZE 1000
+#define MAX_PROGRAM_LENGTH 100
 
 #define FALSE 0
 #define TRUE 1

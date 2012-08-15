@@ -4,9 +4,13 @@
 #include "../defs.h"
 #include <stdlib.h>
 
+stack_t parse_string(char *);
+
 graph_t build_graph(stack_t instructions)
 {
     graph_t new_graph = (graph_t)calloc(1, sizeof(graph));
+    graph_t expr_graph = (graph_t)calloc(1, sizeof(graph));
+
     stack_t aux_node_stack = (stack_t)calloc(1, sizeof(stack));
 
     node_t new_node;
@@ -52,6 +56,10 @@ graph_t build_graph(stack_t instructions)
             new_node->false_node = ending_graph_node->true_node;
             if (new_node_type == WHILE)
                 ending_graph_node->true_node = new_node;
+	    expr_graph = build_graph(parse_string(new_instruction->expr));
+	    if (expr_graph == NULL)
+		return NULL;
+	    new_node->conditional_expr = expr_graph->first;	
         }
             
         new_graph->first = new_node;

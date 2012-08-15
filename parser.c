@@ -73,6 +73,21 @@ void set_lists(){
 	functions_list[8] = &parse_endwhile;
 }
 
+stack_t parse_string(char * string){
+	int i = 0, size;
+	char line[MAX_INSTRUCTION_LENGTH];
+	stack_t cmd_stack = create_stack();
+	
+	while(!string[i]){
+		sscanf(string+i, "%s", line);
+		size = strlen(line);
+		if (select_instruction(line, cmd_stack) == -1)
+			return NULL;
+		i += size;
+	}
+	return cmd_stack;
+}
+
 int select_instruction(char * instr, stack_t stack){
 	
 	int i, cmd_length;
