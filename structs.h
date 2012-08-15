@@ -36,6 +36,7 @@ typedef struct graph_node{
 	struct instruction * instruction_process;
 	struct graph_node * true_node;
 	struct graph_node * false_node;
+	struct graph_node * conditional_expr;
 } graph_node;
 
 typedef struct{
