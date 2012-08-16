@@ -81,6 +81,7 @@ typedef struct ipc_params{
 typedef struct process{
 	struct ipc_params * params;
 	int type;
+	int pid;
 } process;
 
 typedef struct client_header{

@@ -29,6 +29,7 @@ main(void)
 	stack_t c_stack;
 	graph_t c_graph;
 	node_t c_g_node;
+	node_t cond_node;
 
 	char * read_string;
 	
@@ -50,8 +51,6 @@ main(void)
 				sleep(1);
 			} 
 
-			printf("%s", read_string);
-
 			c_stack = parse_file(read_string);
 
 			c_graph = build_graph(c_stack);
@@ -69,14 +68,23 @@ main(void)
 						printf("parte falsa del %d: %d\n", c_g_node->instruction_process->instruction_type->type, c_g_node->false_node->instruction_process->instruction_type->type);
 					}
 
+					if (c_g_node->conditional_expr != NULL){
+						cond_node = c_g_node->conditional_expr;
+						do {
+							printf("condicional: %d, %d\n", cond_node->instruction_process->instruction_type->type, cond_node->instruction_process->param);
+							cond_node = cond_node->true_node;
+						} while(cond_node != NULL);
+						
+					}
+
 					c_g_node = c_g_node->true_node;
 				}while(c_g_node != NULL);
 
 			}else{
 				printf("Escribi bien, pelotudo\n");
 			}
-		}
 		sleep(1);
+		}
 	}
 		
 

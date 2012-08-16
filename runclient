@@ -1,0 +1,2 @@
+gcc -g -o soclient client.c IPCS/fifo.c
+./soclient
