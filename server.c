@@ -147,26 +147,26 @@ void create_processes(){
 	char * to_exec;
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
+		
+		
+		(*(process_list[i]))->params = calloc(1, sizeof(struct ipc_params));
+		string_length = strlen(process_name_list[i]) +  TMP_LENGTH + 1;
+		string_name = calloc(1, string_length);
+		for (j = 0; j < TMP_LENGTH; j++)
+			string_name[j] = ct_tmp[j];
+		for (j = 0; j < string_length - TMP_LENGTH; j++)
+			string_name[j+TMP_LENGTH] = process_name_list[i][j];
+		string_name[string_length - 1] = 0;
+		(*(process_list[i]))->params->file = string_name;
+		ipc_create((*(process_list[i]))->params);
+		
 		switch(pid = fork()){
 			case -1:
 				perror("Fork exception");
 				exit(1);
 				break;
 			case 0: /* Hijo */
-				(*(process_list[i]))->params = calloc(1, sizeof(struct ipc_params));
-				string_length = strlen(process_name_list[i]) +  TMP_LENGTH + 1;
-				string_name = calloc(1, string_length);
-				for (j = 0; j < TMP_LENGTH; j++)
-					string_name[j] = ct_tmp[j];
-				for (j = 0; j < string_length - TMP_LENGTH; j++)
-					string_name[j+TMP_LENGTH] = process_name_list[i][j];
-				string_name[string_length - 1] = 0;
-				(*(process_list[i]))->params->file = string_name;
-				
 				(*(process_list[i]))->pid = getpid();
-				
-				ipc_create((*(process_list[i]))->params);
-				
 				to_exec_length = strlen(process_name_list[i]) + PROCESSES_LENGTH + 1;
 				to_exec = calloc(1, to_exec_length);
 				for (j = 0; j < PROCESSES_LENGTH; j++)
@@ -183,5 +183,8 @@ void create_processes(){
 				exit(1);
 				break;
 		}
+		/* Los procesos hijos no deberian llegar aca por el exec */
+		
+		ipc_open((*(process_list[i]))->params, O_WRONLY|O_NONBLOCK);
 	}
 }

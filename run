@@ -1,3 +1,12 @@
 rm /tmp/server
 gcc -g -o soserver server.c parser.c Data_Structures/graph.c Data_Structures/stack.c IPCS/fifo.c
+gcc -g -o inc Processes/inc_process.c
+gcc -g -o dec Processes/inc_process.c
+gcc -g -o mr Processes/inc_process.c
+gcc -g -o ml Processes/inc_process.c
+gcc -g -o cz Processes/inc_process.c
+gcc -g -o if Processes/inc_process.c
+gcc -g -o endif Processes/inc_process.c
+gcc -g -o while Processes/inc_process.c
+gcc -g -o endwhile Processes/inc_process.c
 ./soserver

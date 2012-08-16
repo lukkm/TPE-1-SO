@@ -6,6 +6,7 @@
 int pre_execute(process_params_t);
 void* execute_cz (void*);
 
+extern process_t cz_process;
 
 int pre_execute(process_params_t params)
 {
