@@ -4,7 +4,7 @@
 #include "../defs.h"
 #include <stdlib.h>
 
-stack_t parse_string(char *);
+int parse_string(char *, stack_t);
 
 graph_t build_graph(stack_t instructions)
 {
@@ -57,7 +57,10 @@ graph_t build_graph(stack_t instructions)
             new_node->false_node = ending_graph_node->true_node;
             if (new_node_type == WHILE)
                 ending_graph_node->true_node = new_node;
-	    expr_stack = parse_string(new_instruction->expr);
+	    expr_stack = create_stack();
+
+	    if (parse_string(new_instruction->expr, expr_stack) == -1)
+		return NULL;
 	    
 	    expr_graph = build_graph(expr_stack);
 	    if (expr_graph == NULL)

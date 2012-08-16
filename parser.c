@@ -11,6 +11,8 @@
 
 /* Include "processes.h" */
 
+#define CLEAN_LINE int i;for(i=0;i<MAX_INSTRUCTION_LENGTH;i++)line[i]=0;
+
 char * command_list[CANT_INSTRUCTIONS];
 int (* functions_list[CANT_INSTRUCTIONS]) (char *, stack_t, instruction_t);
 void set_lists(void);
@@ -25,6 +27,8 @@ int parse_endif(char * instr, stack_t stack, instruction_t new_instr);
 int parse_while(char * instr, stack_t stack, instruction_t new_instr);
 int parse_endwhile(char * instr, stack_t stack, instruction_t new_instr);
 
+int parse_string(char * string, stack_t c_stack);
+
 extern process_t inc_process;
 extern process_t dec_process;
 extern process_t mr_process;
@@ -37,6 +41,8 @@ extern process_t endwhile_process;
 
 stack_t parse_file(char * file_adress){
 	FILE * file;
+	char c;
+	int i;
 	set_lists();
 	file = fopen(file_adress, "r");
 	if (file == NULL)
@@ -44,9 +50,16 @@ stack_t parse_file(char * file_adress){
 	stack_t stack = create_stack();
 	char line[MAX_INSTRUCTION_LENGTH];	
 	while(!feof(file)){
-		fscanf(file, "%s", line);
-		if (select_instruction(line, stack) == -1)
+		i = 0;
+		while((c = fgetc(file)) != '\n' && !feof(file)){
+			line[i++] = c;
+		}
+		line[i] = 0;
+		if(*line != 0 && parse_string(line, stack) == -1)
 			return NULL;
+		//if (select_instruction(line, stack) == -1)
+		//	return NULL;
+		CLEAN_LINE;
 	}
 	return stack;
 }
@@ -73,19 +86,43 @@ void set_lists(){
 	functions_list[8] = &parse_endwhile;
 }
 
-stack_t parse_string(char * string){
-	int i = 0, size;
-	char line[MAX_INSTRUCTION_LENGTH];
-	stack_t cmd_stack = create_stack();
+int parse_string(char * string, stack_t c_stack){
+	int i = 0;//, size;
+	int count = 0, flag = 0;
+	char * aux_str;
+//	char line[MAX_INSTRUCTION_LENGTH];
 	
 	while(string[i]){
+		if (string[i] == '(') {
+			count++;
+			flag = 1;
+		} else if (string[i] == ')'){
+			count--;
+			if (flag && !count){
+				string[++i] = 0;
+				aux_str = string+i+1;
+				if (select_instruction(string, c_stack) == -1)
+					return -1;
+				string = aux_str;
+				flag = 0;
+				i = -1;
+			}
+		}
+		i++;
+		
+	}
+	if (i)
+		return select_instruction(string, c_stack);
+
+/*	while(string[i]){
 		sscanf(string+i, "%s ", line);
 		size = strlen(line);
-		if (select_instruction(line, cmd_stack) == -1)
-			return NULL;
+		if (select_instruction(line, c_stack) == -1)
+			return -1;
 		i += size;
-	}
-	return cmd_stack;
+		while(string[i] == ' ') i++;
+	}*/
+	return 0;
 }
 
 int select_instruction(char * instr, stack_t stack){
@@ -157,7 +194,7 @@ int parse_ml(char * instr, stack_t stack, instruction_t new_instr){
 
 int parse_cz(char * instr, stack_t stack, instruction_t new_instr){
 	int num;
-	if (sscanf(instr, "CZ")){
+	if (!strcmp(instr, "CZ")){
 		new_instr->instruction_type = cz_process;
 		if (push(stack, new_instr) == -1)
 			return -1;
@@ -167,14 +204,17 @@ int parse_cz(char * instr, stack_t stack, instruction_t new_instr){
 }
 
 int parse_if(char * instr, stack_t stack, instruction_t new_instr){
-	int num, size;
+	int num, size, i = 0;
 	char * pos;
 	char * expr = calloc(1, MAX_INSTRUCTION_LENGTH);
 	if (sscanf(instr, "IF(%d,", &num)){
 		new_instr->instruction_type = if_process;
 		new_instr->param = num;
 		pos = strchr(instr, ',') + 1;
-		expr = pos;
+		while(pos[i] != 0){
+			expr[i] = pos[i];
+			i++;		
+		}
 		expr[strlen(expr)-1] = 0;
 		new_instr->expr = expr;
 		if (push(stack, new_instr) == -1)
