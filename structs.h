@@ -53,7 +53,7 @@ int id;
 
 typedef struct process_params /*Estructura necesaria para los threads, se carga en base a las IPC's*/
 {
-struct status * c_status;
+struct status c_status;
 int param;
 } process_params;
 
