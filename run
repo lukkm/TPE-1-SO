@@ -1,0 +1,12 @@
+rm /tmp/server
+gcc -g -o soserver server.c parser.c Data_Structures/graph.c Data_Structures/stack.c IPCS/fifo.c
+gcc -g -o Processes/inc Processes/inc_process.c IPCS/fifo.c
+gcc -g -o Processes/dec Processes/dec_process.c IPCS/fifo.c
+gcc -g -o Processes/mr Processes/mr_process.c IPCS/fifo.c
+gcc -g -o Processes/ml Processes/ml_process.c IPCS/fifo.c
+gcc -g -o Processes/cz Processes/cz_process.c IPCS/fifo.c
+gcc -g -o Processes/if Processes/if_process.c IPCS/fifo.c
+gcc -g -o Processes/endif Processes/endif_process.c IPCS/fifo.c
+gcc -g -o Processes/while Processes/while_process.c IPCS/fifo.c
+gcc -g -o Processes/endwhile Processes/endwhile_process.c IPCS/fifo.c
+./soserver
