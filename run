@@ -1,3 +1,0 @@
-rm /tmp/server
-gcc -g -o soserver serveraux.c parser.c Data_Structures/graph.c Data_Structures/stack.c IPCS/fifo.c
-./soserver
