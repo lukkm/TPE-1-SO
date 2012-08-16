@@ -3,6 +3,9 @@
 #define MEM_SIZE 1000
 #define MAX_PROGRAM_LENGTH 100
 
+#define TMP_LENGTH 5
+#define PROCESSES_LENGTH 10
+
 #define FALSE 0
 #define TRUE 1
 

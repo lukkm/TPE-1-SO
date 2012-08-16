@@ -12,7 +12,7 @@ int pre_execute(process_params_t params)
   
 	pthread_t thread_id;	
 	process_params_t thread_args = params;
-	pthread_create(&thread_id, NULL, &execute_endwhile, &thread_args);
+	//pthread_create(&thread_id, NULL, &execute_endwhile, &thread_args);
 	return 0;
 
 }
