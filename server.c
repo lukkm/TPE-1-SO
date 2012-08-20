@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
 
 
 #include "structs.h"
@@ -27,6 +30,9 @@ char * process_name_list[CANT_INSTRUCTIONS];
 
 void init(void);
 void create_processes(void);
+void fatal(char *s);
+void create_sh_graph(graph_t, int, int);
+int get_graph_size(graph_t);
 
 int
 main(void) 
@@ -34,10 +40,11 @@ main(void)
 	init();
 	stack_t c_stack;
 	graph_t c_graph;
-	node_t c_g_node;
-	node_t cond_node;
 
 	char * read_string;
+	int aux_size;
+	
+	printf("holi\n");
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
 
@@ -56,37 +63,14 @@ main(void)
 			while(ipc_receive(server_params, read_string, header->program_size) == 0){
 				sleep(1);
 			} 
-			
+
 			c_stack = parse_file(read_string);
 
 			c_graph = build_graph(c_stack);
 
 			if (c_graph != NULL){
-
-				c_g_node = c_graph->first;
-
-				do{
-	
-					printf("%d ", c_g_node->instruction_process->instruction_type->type);
-					printf("%d\n", c_g_node->instruction_process->param);
-					ipc_send(c_g_node->instruction_process->instruction_type->params, "holis", 5);
-			
-					if (c_g_node->false_node != NULL){
-						printf("parte falsa del %d: %d\n", c_g_node->instruction_process->instruction_type->type, c_g_node->false_node->instruction_process->instruction_type->type);
-					}
-
-					if (c_g_node->conditional_expr != NULL){
-						cond_node = c_g_node->conditional_expr;
-						do {
-							printf("condicional: %d, %d\n", cond_node->instruction_process->instruction_type->type, cond_node->instruction_process->param);
-							cond_node = cond_node->true_node;
-						} while(cond_node != NULL);
-						
-					}
-
-					c_g_node = c_g_node->true_node;
-				}while(c_g_node != NULL);
-
+				create_sh_graph(c_graph, get_graph_size(c_graph), 
+								190690);
 			}else{
 				printf("Escribi bien, pelotudo\n");
 			}
@@ -96,6 +80,71 @@ main(void)
 		
 
 	return 0;
+}
+
+void create_sh_graph(graph_t c_graph, int size, int memkey)
+{
+	graph_t sh_graph;
+	int memid;
+	void * mem;
+	
+	if ( (memid = shmget(memkey, size, IPC_CREAT|0666)) == -1 )
+		fatal("shmget");
+	if ( !(mem = shmat(memid, NULL, 0)) )
+		fatal("shmat");
+	sh_graph = (graph_t)mem;
+	if (copy_graph(c_graph, sh_graph) == size);
+		printf("BIEEEEN CAMPEON DEL MUNDO, BARRILETE COSMICO\n");
+	// CORRER PASANDOLE memid	
+}
+
+void * copy_node(node_t cur_node, int start, int size)
+{
+	return 0;
+}
+
+int copy_graph(graph_t c_graph, graph_t sh_graph, int mem_size)
+{
+	int cursor = 0, aux_size;
+	node_t aux_sh_node, aux_c_node;
+	aux_size = sizeof(graph);
+	
+	sh_graph = memcpy(sh_graph, c_graph, aux_size);
+	cursor += aux_size;
+	
+	aux_size = get_node_size(c_graph->first);
+	if ((sh_graph->first = 
+				copy_node(sh_graph, c_graph->first, cursor, aux_size)) == -1)
+		return -1;
+	cursor += aux_size;
+	sh_graph->current = sh_graph->first;
+	
+	aux_sh_node = sh_graph->first;
+	aux_c_node = c_graph->first;
+	
+	while (cursor <= mem_size)
+	{
+		aux_size = get_node_size(aux_c_node);
+		if ((aux_sh_node = copy_node(sh_graph, aux_c_node, cursor, 
+										aux_size)) != -1)
+			return -1;
+		cursor += aux_size;
+		if (flag)
+		{
+			*((node_t*)pop(STACK)) = aux_node;
+			flag = 0;
+		}
+		if (ENDIF o ENDWHILE)
+			flag = 1;
+		if (aux_c_node->false_node != NULL)
+			push(STACK, &aux_sh_node->false_node);
+		if (aux_c_node->conditional_expr != NULL)
+			;// CONDITIONAL!!!!!!!!!
+		aux_sh_node->true_node = sh_graph+cursor;
+	}
+	if (!is_empty(STACK))
+		return -1;
+	return cursor;
 }
 
 void init(){

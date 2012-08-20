@@ -114,7 +114,6 @@ int get_node_size(node_t cur_node)
 	if (cur_node == NULL)
 		return 0;
 	return get_node_size(cur_node->true_node) + 
-			get_node_size(cur_node->false_node)	+ 
 			get_node_size(cur_node->conditional_expr) + 
 			sizeof(graph_node) + 
 			get_instr_size(cur_node->instruction_process);
