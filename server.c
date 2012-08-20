@@ -92,9 +92,9 @@ void create_sh_graph(graph_t c_graph, int size, int memkey)
 		fatal("shmget");
 	if ( !(mem = shmat(memid, NULL, 0)) )
 		fatal("shmat");
-	sh_graph = (graph_t)mem;
-	if (copy_graph(c_graph, sh_graph) == size);
+	if (copy_graph(c_graph, mem, size) == size);
 		printf("BIEEEEN CAMPEON DEL MUNDO, BARRILETE COSMICO\n");
+	sh_graph = (graph_t)mem;
 	// CORRER PASANDOLE memid	
 }
 
@@ -103,9 +103,11 @@ void * copy_node(node_t cur_node, int start, int size)
 	return 0;
 }
 
-int copy_graph(graph_t c_graph, graph_t sh_graph, int mem_size)
+void * copy_conditional_branch(graph_t sh_graph, 
+
+int copy_graph(graph_t c_graph, void * sh_graph, int mem_size)
 {
-	int cursor = 0, aux_size;
+	int cursor = 0, aux_size, aux_type;
 	node_t aux_sh_node, aux_c_node;
 	aux_size = sizeof(graph);
 	
@@ -113,13 +115,13 @@ int copy_graph(graph_t c_graph, graph_t sh_graph, int mem_size)
 	cursor += aux_size;
 	
 	aux_size = get_node_size(c_graph->first);
-	if ((sh_graph->first = 
+	if ((((graph_t)sh_graph)->first = 
 				copy_node(sh_graph, c_graph->first, cursor, aux_size)) == -1)
 		return -1;
 	cursor += aux_size;
-	sh_graph->current = sh_graph->first;
+	((graph_t)sh_graph)->current = ((graph_t)sh_graph)->first;
 	
-	aux_sh_node = sh_graph->first;
+	aux_sh_node = ((graph_t)sh_graph)->first;
 	aux_c_node = c_graph->first;
 	
 	while (cursor <= mem_size)
@@ -134,12 +136,16 @@ int copy_graph(graph_t c_graph, graph_t sh_graph, int mem_size)
 			*((node_t*)pop(STACK)) = aux_node;
 			flag = 0;
 		}
-		if (ENDIF o ENDWHILE)
+		aux_type = 
+				aux_c_node->instruction_process->instruction_type->type;
+		if (aux_type == ENDIF || aux_type == ENDWHILE)
 			flag = 1;
 		if (aux_c_node->false_node != NULL)
 			push(STACK, &aux_sh_node->false_node);
 		if (aux_c_node->conditional_expr != NULL)
-			;// CONDITIONAL!!!!!!!!!
+			aux_sh_node->conditional_expr = 
+					copy_conditional_branch(sh_graph, 
+								aux_c_node->conditional_expr, &cursor);
 		aux_sh_node->true_node = sh_graph+cursor;
 	}
 	if (!is_empty(STACK))
