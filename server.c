@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -15,21 +16,22 @@
 #include "Data_Structures/stack.h"
 #include "IPCS/ipcs.h"
 
-process_t inc_process;
-process_t dec_process;
-process_t mr_process;
-process_t ml_process;
-process_t cz_process;
-process_t if_process;
-process_t endif_process;
-process_t while_process;
-process_t endwhile_process;
+extern process_t inc_process;
+extern process_t dec_process;
+extern process_t mr_process;
+extern process_t ml_process;
+extern process_t cz_process;
+extern process_t if_process;
+extern process_t endif_process;
+extern process_t while_process;
+extern process_t endwhile_process;
 
-process_t * process_list[CANT_INSTRUCTIONS];
-char * process_name_list[CANT_INSTRUCTIONS];
+extern process_t * process_list[CANT_INSTRUCTIONS];
+extern char * process_name_list[CANT_INSTRUCTIONS];
+extern ipc_params_t ipcs_com_info[CANT_INSTRUCTIONS * (CANT_INSTRUCTIONS - 1)];
 
 void init(void);
-void create_processes(void);
+void init_processes(void);
 void fatal(char *s);
 void create_sh_graph(graph_t, int, int);
 int get_graph_size(graph_t);
@@ -37,6 +39,7 @@ int get_graph_size(graph_t);
 int
 main(void) 
 {
+	init_processes();
 	init();
 	stack_t c_stack;
 	graph_t c_graph;
@@ -104,11 +107,16 @@ void * copy_node(node_t cur_node, int start, int size)
 }
 
 void * copy_conditional_branch(graph_t sh_graph, 
+								node_t cur_node, int * cursor)
+{
+	return 0;
+}
 
 int copy_graph(graph_t c_graph, void * sh_graph, int mem_size)
 {
 	int cursor = 0, aux_size, aux_type;
 	node_t aux_sh_node, aux_c_node;
+	stack_t aux_stack = create_stack();
 	aux_size = sizeof(graph);
 	
 	sh_graph = memcpy(sh_graph, c_graph, aux_size);
@@ -133,90 +141,61 @@ int copy_graph(graph_t c_graph, void * sh_graph, int mem_size)
 		cursor += aux_size;
 		if (flag)
 		{
-			*((node_t*)pop(STACK)) = aux_node;
-			flag = 0;
+			if (!is_empty(aux_stack))
+			{
+				*((node_t*)pop(aux_stack)) = aux_node;
+				flag = 0;
+			} else {
+				return -1;
+			}
 		}
 		aux_type = 
 				aux_c_node->instruction_process->instruction_type->type;
 		if (aux_type == ENDIF || aux_type == ENDWHILE)
 			flag = 1;
 		if (aux_c_node->false_node != NULL)
-			push(STACK, &aux_sh_node->false_node);
+			push(aux_stack, &aux_sh_node->false_node);
 		if (aux_c_node->conditional_expr != NULL)
 			aux_sh_node->conditional_expr = 
 					copy_conditional_branch(sh_graph, 
 								aux_c_node->conditional_expr, &cursor);
 		aux_sh_node->true_node = sh_graph+cursor;
 	}
-	if (!is_empty(STACK))
+	if (!is_empty(aux_stack))
 		return -1;
 	return cursor;
 }
 
 void init(){
-	int i;
-
-	process_list[0] = &inc_process;
-	process_list[1] = &dec_process; 
-	process_list[2] = &mr_process;
-	process_list[3] = &ml_process;
-	process_list[4] = &cz_process;
-	process_list[5] = &if_process;
-	process_list[6] = &endif_process;
-	process_list[7] = &while_process; 
-	process_list[8] = &endwhile_process;
-	
-	process_name_list[0] = "inc";
-	process_name_list[1] = "dec";
-	process_name_list[2] = "mr";
-	process_name_list[3] = "ml";
-	process_name_list[4] = "cz";
-	process_name_list[5] = "if";
-	process_name_list[6] = "endif";
-	process_name_list[7] = "while";
-	process_name_list[8] = "endwhile";
-
-	for (i = 0; i < CANT_INSTRUCTIONS; i++){
-		*(process_list[i]) = calloc(1, sizeof(struct process));
-		(*(process_list[i]))->params = calloc(1, sizeof(struct ipc_params));
-	}
-
-	inc_process->type = INC;
-	dec_process->type = DEC;
-	mr_process->type = MR;
-	ml_process->type = ML;
-	cz_process->type = CZ;
-	if_process->type = IF;
-	endif_process->type = ENDIF;
-	while_process->type = WHILE;	
-	endwhile_process->type = ENDWHILE;	
-
-	create_processes();
-}
-
-void create_processes(){
-	int i, j, pid;
+	int i, j, k, pid;
 	int string_length;
 	int to_exec_length;
-	char * string_name;
-	char * ct_tmp = "/tmp/";
 	char * ct_process = "Processes/";
 	char * to_exec;
+	
+	int com_length;
+	char * com_file;
+	
 	
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
 		
+		ipc_create((*process_list[i])->params);
 		
-		(*(process_list[i]))->params = calloc(1, sizeof(struct ipc_params));
-		string_length = strlen(process_name_list[i]) +  TMP_LENGTH + 1;
-		string_name = calloc(1, string_length);
-		for (j = 0; j < TMP_LENGTH; j++)
-			string_name[j] = ct_tmp[j];
-		for (j = 0; j < string_length - TMP_LENGTH; j++)
-			string_name[j+TMP_LENGTH] = process_name_list[i][j];
-		string_name[string_length - 1] = 0;
-		(*(process_list[i]))->params->file = string_name;
-		ipc_create((*(process_list[i]))->params);
+		for(j = 0; j < CANT_INSTRUCTIONS; j++){
+			if (i != j){
+				com_length = strlen((*process_list[i])->params->file) + strlen(process_name_list[j])+1;
+				com_file = calloc(1, com_length);
+				strcpy(com_file, (*process_list[i])->params->file);
+				strcat(com_file, process_name_list[j]);
+				com_file[com_length-1] = 0;
+				ipc_params_t ipc_com = calloc(1, sizeof(struct ipc_params));
+				ipc_com->file = com_file;
+				ipcs_com_info[i*(CANT_INSTRUCTIONS) + j] = ipc_com;
+				ipc_create(ipc_com);
+				free(com_file);
+			}
+		}
 		
 		switch(pid = fork()){
 			case -1:
@@ -229,10 +208,9 @@ void create_processes(){
 				to_exec = calloc(1, to_exec_length);
 				for (j = 0; j < PROCESSES_LENGTH; j++)
 					to_exec[j] = ct_process[j];
-				for (j = 0; j < string_length - TMP_LENGTH; j++)
+				for (j = 0; j < to_exec_length - PROCESSES_LENGTH; j++)
 					to_exec[j+PROCESSES_LENGTH] = process_name_list[i][j];
 				to_exec[to_exec_length - 1] = 0;
-				
 				execvp(to_exec, NULL);			
 				
 				/* No deberia llegar aca */
@@ -241,8 +219,8 @@ void create_processes(){
 				exit(1);
 				break;
 		}
-		
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		
 	}
+
 }
