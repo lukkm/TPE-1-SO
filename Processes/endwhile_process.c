@@ -7,6 +7,8 @@
 
 int pre_execute(process_params_t);
 void* execute_endwhile (void*);
+void init_processes(void);
+
 process_t endwhile_process;
 
 
@@ -24,14 +26,8 @@ int pre_execute(process_params_t params)
 
 int main(void)
 {
-	/* Useless */
-	endwhile_process = calloc(1, sizeof(struct process));
-	endwhile_process->params = calloc(1, sizeof (struct ipc_params));
-	endwhile_process->params->file = "/tmp/endwhile";
-	
-	process_params_t empty;
 	char line[100];	
-	pre_execute(empty);
+	init_processes();
 	printf("Test endwhile \n");
 	ipc_open(endwhile_process->params, O_RDONLY|O_NONBLOCK);
 	while(1){
@@ -40,6 +36,7 @@ int main(void)
 		}
 		sleep(1);
 	}
+	
 	return 0;
 }
 

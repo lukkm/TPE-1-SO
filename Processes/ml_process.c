@@ -7,6 +7,8 @@
 
 int pre_execute(process_params_t);
 void* execute_ml (void*);
+void init_processes(void);
+
 process_t ml_process;
 
 
@@ -24,14 +26,8 @@ int pre_execute(process_params_t params)
 
 int main(void)
 {
-	/* Useless */
-	ml_process = calloc(1, sizeof(struct process));
-	ml_process->params = calloc(1, sizeof (struct ipc_params));
-	ml_process->params->file = "/tmp/ml";
-	
-	process_params_t empty;
 	char line[100];	
-	pre_execute(empty);
+	init_processes();
 	printf("Test ml \n");
 	ipc_open(ml_process->params, O_RDONLY|O_NONBLOCK);
 	while(1){
@@ -40,6 +36,7 @@ int main(void)
 		}
 		sleep(1);
 	}
+	
 	return 0;
 }
 

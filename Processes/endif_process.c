@@ -7,6 +7,8 @@
 
 int pre_execute(process_params_t);
 void* execute_endif (void*);
+void init_processes(void);
+
 process_t endif_process;
 
 int pre_execute(process_params_t params)
@@ -23,14 +25,8 @@ int pre_execute(process_params_t params)
 
 int main(void)
 {
-	/* Useless */
-	endif_process = calloc(1, sizeof(struct process));
-	endif_process->params = calloc(1, sizeof (struct ipc_params));
-	endif_process->params->file = "/tmp/endif";
-	
-	process_params_t empty;
 	char line[100];	
-	pre_execute(empty);
+	init_processes();
 	printf("Test endif \n");
 	ipc_open(endif_process->params, O_RDONLY|O_NONBLOCK);
 	while(1){
@@ -39,6 +35,7 @@ int main(void)
 		}
 		sleep(1);
 	}
+	
 	return 0;
 }
 

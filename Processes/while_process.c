@@ -7,6 +7,8 @@
 
 int pre_execute(process_params_t);
 void* execute_while (void*);
+void init_processes(void);
+
 process_t while_process;
 
 
@@ -24,22 +26,17 @@ int pre_execute(process_params_t params)
 
 int main(void)
 {
-	/* Useless */
-	while_process = calloc(1, sizeof(struct process));
-	while_process->params = calloc(1, sizeof (struct ipc_params));
-	while_process->params->file = "/tmp/while";
-	
-	process_params_t empty;
 	char line[100];	
-	pre_execute(empty);
-	printf("Test WHILE \n");
+	init_processes();
+	printf("Test while \n");
 	ipc_open(while_process->params, O_RDONLY|O_NONBLOCK);
 	while(1){
 		if (ipc_receive(while_process->params, line, 100) > 0){
-			printf("El proceso WHILE recibio: %s\n", line);
+			printf("El proceso while recibio: %s\n", line);
 		}
 		sleep(1);
 	}
+	
 	return 0;
 }
 

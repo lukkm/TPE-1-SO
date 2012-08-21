@@ -8,6 +8,7 @@
 
 int pre_execute(process_params_t);
 void* execute_inc (void*);
+void init_processes(void);
 
 process_t inc_process;
 
@@ -38,6 +39,8 @@ int main(void)
 	/*Fin de Ejemplo*/
 	
 	/* Useless */
+	
+	/*
 	inc_process = calloc(1, sizeof(struct process));
 	inc_process->params = calloc(1, sizeof (struct ipc_params));
 	inc_process->params->file = "/tmp/inc";
@@ -54,6 +57,19 @@ int main(void)
 		sleep(1);
 	}
 
+	*/
+	
+	char line[100];	
+	init_processes();
+	printf("Test inc \n");
+	ipc_open(inc_process->params, O_RDONLY|O_NONBLOCK);
+	while(1){
+		if (ipc_receive(inc_process->params, line, 100) > 0){
+			printf("El proceso INC recibio: %s\n", line);
+		}
+		sleep(1);
+	}
+	
 	return 0;
 }
 
