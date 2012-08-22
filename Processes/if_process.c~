@@ -34,13 +34,21 @@ int main(void)
 				fatal("shmat");
 			thread_args = pre_execute(&c_program, mem->current->instruction_process->param);
 			printf("If process\n");			
-			printf("Estado ANTES: %d\n", c_program.mem[c_program.cursor]); 
-			pthread_create(&thread_id, NULL, &execute_if, thread_args);			
-			sem_wait(&sem);
-			printf("Estado DESPUES: %d\n", c_program.mem[c_program.cursor]); 
-			mem->current = mem->current->true_node;
+			if (!mem->current->cond_executed){
+				mem->current = mem->current->conditional_expr;
+				mem->current->cond_executed = 1;
+			}else{
+				mem->current->cond_executed = 0;
+				if (c_program.flag){
+					mem->current = mem->current->true_node;
+				}else{
+					mem->current = mem->current->false_node;
+				}
+			}
 			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			else
+				shmctl(c_program.g_header.fd, IPC_RMID, 0);
 			shmdt(mem);
 		}
 		sleep(1);
