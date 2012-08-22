@@ -17,6 +17,7 @@ graph_t build_graph(stack_t instructions)
 
     node_t new_node;
     node_t ending_graph_node;
+	node_t aux_cond_node;
 
     stack_node aux_node;
     stack_node ending_node;
@@ -40,6 +41,7 @@ graph_t build_graph(stack_t instructions)
 		new_node_type = new_instruction->instruction_type->type;
         
         new_node->instruction_process = new_instruction;
+		new_node->cond_executed = 0;
         if (new_graph->first)
 			new_node->true_node = new_graph->first;
         if (new_node_type == ENDWHILE || new_node_type == ENDIF)
@@ -67,6 +69,7 @@ graph_t build_graph(stack_t instructions)
 			if (expr_graph == NULL)
 				return NULL;
 			new_node->conditional_expr = expr_graph->first;
+			aux_cond_node = expr_graph->first;
         }
             
         new_graph->first = new_node;
