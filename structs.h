@@ -1,42 +1,32 @@
-/*typedef struct program program;
-typedef struct process process;
-typedef struct instruction instruction;
-typedef struct stack stack;
-typedef struct node node;
-typedef struct graph_node graph_node;
-typedef struct graph graph;*/
-
-
-
 typedef struct program{
-int memory[1000];
-int current;
-int variable;
-struct shared_graph_header graph;
+	int memory[1000];
+	int current;
+	int variable;
+	struct shared_graph_header graph;
 } program;
 
 typedef struct instruction{
-struct process * instruction_type;
-int param;
-char * expr;
+		struct process * instruction_type;
+		int param;
+		char * expr;
 } instruction;
 
 typedef struct node{
-struct node * next;
-void * info;
-/* Informacion del nodo, puede ser process_t o node_t */
+	struct node * next;
+	void * info;
+	/* Informacion del nodo, puede ser process_t o node_t */
 } node;
 
 typedef struct stack{
-node * first;
-int size;
+	node * first;
+	int size;
 } stack;
 
 typedef struct graph_node{
-struct instruction * instruction_process;
-struct graph_node * true_node;
-struct graph_node * false_node;
-struct graph_node * conditional_expr;
+	struct instruction * instruction_process;
+	struct graph_node * true_node;
+	struct graph_node * false_node;
+	struct graph_node * conditional_expr;
 } graph_node;
 
 typedef struct{
@@ -45,48 +35,47 @@ typedef struct{
 /* Mas informacion que pueda tener */
 } graph;
 
-typedef struct process_params /*Estructura necesaria para los threads, se carga en base a las IPC's*/
-{
-struct status c_status;
-int param;
+typedef struct process_params{
+	struct status c_status;
+	int param;
 } process_params;
 
 typedef struct ipc_params{
 
-/*------------------*/
-/* FIFO PARAMS */
-char * file;
-int action;
-int fd;
+	/*------------------*/
+	/* FIFO PARAMS */
+	char * file;
+	int action;
+	int fd;
 
-/*------------------*/
+	/*------------------*/
 
-/* SHARED MEMORY PARAMS */
-int shm_segment_size;
-int segment_id;
-void* shared_memory_address; // IDIOTA VOS PUTO!!! //EL LUKO DIJO QUE ERA VOID
-//char* msg;
+	/* SHARED MEMORY PARAMS */
+	int shm_segment_size;
+	int segment_id;
+	void* shared_memory_address; // IDIOTA VOS PUTO!!! //EL LUKO DIJO QUE ERA VOID
+	//char* msg;
 
-/*------------------*/
-/* MESSAGE QUEUE PARAMS */
+	/*------------------*/
+	/* MESSAGE QUEUE PARAMS */
 
-int unique_mq_id;
+	int unique_mq_id;
 
-/*------------------*/
+	/*------------------*/
 
-/*------------------*/
-/* SOCKET PARAMS */
+	/*------------------*/
+	/* SOCKET PARAMS */
 
-int socket_fd;
+	int socket_fd;
 
-/*------------------*/
+	/*------------------*/
 
 } ipc_params;
 
 typedef struct process{
-struct ipc_params * params;
-int type;
-int pid;
+	struct ipc_params * params;
+	int type;
+	int pid;
 } process;
 
 typedef struct shared_graph_header{
@@ -96,8 +85,8 @@ typedef struct shared_graph_header{
 }shared_graph_header;
 
 typedef struct client_header{
-int client_id;
-int program_size;
+	int client_id;
+	int program_size;
 } client_header;
 
 
