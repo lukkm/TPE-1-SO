@@ -32,11 +32,10 @@ int main(void)
 		if (ipc_receive(if_process->params, &c_program, sizeof(struct status)) > 0){ 
 			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
 				fatal("shmat");
-			thread_args = pre_execute(&c_program, mem->current->instruction_process->param);
 			printf("If process\n");			
 			if (!mem->current->cond_executed){
-				mem->current = mem->current->conditional_expr;
 				mem->current->cond_executed = 1;
+				mem->current = mem->current->conditional_expr;
 			}else{
 				mem->current->cond_executed = 0;
 				if (c_program.flag){
@@ -45,8 +44,10 @@ int main(void)
 					mem->current = mem->current->false_node;
 				}
 			}
-			if (mem->current != NULL)
+			if (mem->current != NULL){
+				putchar('x');
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			}
 			else
 				shmctl(c_program.g_header.fd, IPC_RMID, 0);
 			shmdt(mem);
@@ -55,13 +56,4 @@ int main(void)
 	}
 	
 	return 0;
-}
-
-
-void * execute_if (void * structure_params)
-{
-	process_params_t par = (process_params_t) structure_params;
-
-	printf("WTF \n");
-	return NULL;
 }

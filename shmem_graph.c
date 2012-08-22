@@ -40,6 +40,8 @@ graph_t create_sh_graph(graph_t c_graph, int size, int * memkey, shared_graph_he
 void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 {
 	node_t sh_node;
+	node_t aux_sh_cond;
+	node_t aux_cond;
 	int aux_size, start = *cursor;
 	
 	if (cur_node == NULL)
@@ -72,8 +74,19 @@ void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 					instruction_type->params->file, aux_size);
 	start += aux_size;
 	*cursor = start;
-	sh_node->conditional_expr = copy_graph(cur_node->conditional_expr, 
-											sh_graph, cursor);
+	if (cur_node->conditional_expr != NULL)
+	{
+		aux_cond = cur_node->conditional_expr;
+		aux_sh_cond = (node_t)copy_node(sh_graph, aux_cond, cursor);
+		sh_node->conditional_expr = aux_sh_cond;
+		while (aux_cond->true_node != cur_node)
+		{
+			aux_sh_cond->true_node = (node_t)copy_node(sh_graph, aux_cond->true_node, cursor);
+			aux_cond = aux_cond->true_node;
+			aux_sh_cond = aux_sh_cond->true_node;
+		}
+		aux_sh_cond->true_node = sh_node;
+	}
 	return sh_node;
 }
 

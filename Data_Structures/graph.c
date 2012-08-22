@@ -70,10 +70,8 @@ graph_t build_graph(stack_t instructions)
 				return NULL;
 			new_node->conditional_expr = expr_graph->first;
 			aux_cond_node = expr_graph->first;
-			do
-			{
+			while (aux_cond_node->true_node != NULL)
 				aux_cond_node = aux_cond_node->true_node;
-			} while (aux_cond_node->true_node != NULL);
 			aux_cond_node->true_node = new_node;
         }
             
@@ -119,10 +117,21 @@ int get_instr_size(instruction_t instr)
 
 int get_node_size(node_t cur_node)
 {
+	int cond_size = 0;
 	if (cur_node == NULL)
 		return 0;
+	if (cur_node->conditional_expr != NULL)
+	{
+		if (!cur_node->cond_executed)
+		{
+			cur_node->cond_executed = 1;
+			cond_size = get_node_size(cur_node->conditional_expr);
+		} else {
+			cur_node->cond_executed = 0;
+		}
+	}
 	return get_node_size(cur_node->true_node) + 
-			get_node_size(cur_node->conditional_expr) + 
+			cond_size + 
 			sizeof(graph_node) + 
 			get_instr_size(cur_node->instruction_process);
 }
