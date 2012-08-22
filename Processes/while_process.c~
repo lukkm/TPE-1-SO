@@ -29,9 +29,21 @@ int main(void)
 			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
 				fatal("shmat");
 			printf("WHILE Process\n");
-			mem->current = mem->current->true_node;
+			if (!mem->current->cond_executed){
+				mem->current = mem->current->conditional_expr;
+				mem->current->cond_executed = 1;
+			}else{
+				mem->current->cond_executed = 0;
+				if (c_program.flag){
+					mem->current = mem->current->true_node;
+				}else{
+					mem->current = mem->current->false_node;
+				}
+			}
 			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			else
+				shmctl(c_program.g_header.fd, IPC_RMID, 0);
 			shmdt(mem);
 		}
 		sleep(1);
