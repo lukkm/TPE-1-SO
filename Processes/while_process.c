@@ -5,46 +5,33 @@
 #include "../structs.h"
 #include "../defs.h"
 
-int pre_execute(process_params_t);
-void* execute_while (void*);
+process_params_t pre_execute(status_t, int);
+void call_next_process(status, ipc_params_t);
 void init_processes(void);
 
 process_t while_process;
 
-
-int pre_execute(process_params_t params)
-{
-  
-	pthread_t thread_id;	
-	process_params_t thread_args = params;
-	//pthread_create(&thread_id, NULL, &execute_while, &thread_args);
-	return 0;
-
-}
-
-
-
 int main(void)
 {
-	char line[100];	
+	status c_program;
+	graph_t mem;
+	process_params_t thread_args;
+	pthread_t thread_id;
+
 	init_processes();
-	printf("Test while \n");
-	ipc_open(while_process->params, O_RDONLY|O_NONBLOCK);
+	ipc_open(while_process->params, O_RDONLY);
 	while(1){
-		if (ipc_receive(while_process->params, line, 100) > 0){
-			printf("El proceso while recibio: %s\n", line);
+		if (ipc_receive(while_process->params, &c_program, sizeof(struct status)) > 0){ 
+			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
+				fatal("shmat");
+			printf("WHILE Process\n");
+			mem->current = mem->current->true_node;
+			if (mem->current != NULL)
+				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			shmdt(mem);
 		}
 		sleep(1);
 	}
 	
 	return 0;
-}
-
-
-void* execute_while (void* structure_params)
-{
-	process_params_t par = (process_params_t) structure_params;
-	
-	printf("WTF \n");
-	return NULL;
 }
