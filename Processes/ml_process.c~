@@ -58,7 +58,7 @@ void* execute_ml (void* structure_params)
 	  par->c_status->cursor = 0;
 	else
           par->c_status->cursor -= par->param;
-		
+	sem_post(&sem);
 	return NULL;
 }
 

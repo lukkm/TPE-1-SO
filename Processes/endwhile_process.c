@@ -34,7 +34,7 @@ int main(void)
 				fatal("shmat");
 			printf("ENDWHILE Process\n");
 			mem->current = mem->current->true_node;
-			if (current != NULL)
+			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
 			shmdt(mem);
 		}
