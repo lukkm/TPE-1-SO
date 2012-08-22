@@ -34,7 +34,7 @@ extern ipc_params_t ipcs_com_info[CANT_INSTRUCTIONS * (CANT_INSTRUCTIONS - 1)];
 void init(void);
 void init_processes(void);
 void fatal(char *s);
-void create_sh_graph(graph_t, int, int*);
+void create_sh_graph(graph_t, int, int*, shared_graph_header_t);
 int get_graph_size(graph_t);
 node_t copy_graph(node_t, void *, int *);
 
@@ -49,6 +49,7 @@ main(void)
 	char * read_string;
 	int aux_size;
 	int memkey;
+	shared_graph_header g_header;
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
 
@@ -62,8 +63,6 @@ main(void)
 			
 			read_string = calloc(1, header->program_size);
 			
-			sleep(1);
-			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0){
 				sleep(1);
 			} 
@@ -74,40 +73,40 @@ main(void)
 
 			if (c_graph != NULL){
 				create_sh_graph(c_graph, get_graph_size(c_graph), 
-								&memkey);
+								&memkey, &g_header);
+				ipc_send(inc_process->params, &g_header, sizeof(struct shared_graph_header));
+				ipc_send(inc_process->params, "holis", 5);
 			}else{
 				printf("Escribi bien, pelotudo\n");
 			}
-		sleep(1);
 		}
+		sleep(1);
 	}
 		
 
 	return 0;
 }
 
-void create_sh_graph(graph_t c_graph, int size, int * memkey)
+void create_sh_graph(graph_t c_graph, int size, int * memkey, shared_graph_header_t header)
 {
 	graph_t sh_graph;
 	int cursor;
 	void * mem;
 	
-	printf("Tamaño: %d\n", size);
-	
-	if ( (*memkey = shmget(IPC_PRIVATE, size, IPC_CREAT|0666)) == -1 )
-	{
-		printf("%d %d\n", *memkey, errno);
+	if ( (*memkey = shmget(221193, size, IPC_CREAT|0666)) == -1 )
 		fatal("shmget");
-	}
-	if ( !(mem = shmat(*memkey, NULL, 0)) )
+	if ( (mem = shmat(*memkey, NULL, 0)) == -1 )
 		fatal("shmat");
+	header->fd = *memkey;
+	header->mem_adress = mem; 
+	header->size = size;
 	if ((cursor = w_copy_graph(c_graph, mem)) == size)
 		printf("BIEEEEN CAMPEON DEL MUNDO, BARRILETE COSMICO\n");
 	else
 		printf("cursor: %d\n", cursor);
 	sh_graph = (graph_t)mem;
-	shmdt(mem);
-	shmctl(*memkey, IPC_RMID, 0);
+	//shmdt(mem);
+	//shmctl(*memkey, IPC_RMID, 0);
 	// CORRER PASANDOLE memid	
 }
 
@@ -120,7 +119,7 @@ void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 		return NULL;
 	
 	aux_size = sizeof(struct graph_node);
-	sh_node = (node_t)memcpy(sh_graph + start, cur_node, aux_size);
+	sh_node = (node_t)memcpy(sh_graph + start, cur_node, aux_size) ;
 	
 	start += aux_size;
 	aux_size = sizeof(struct instruction);
@@ -208,7 +207,6 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 		aux_sh_node->true_node = sh_graph + *cursor;
 		aux_sh_node = aux_sh_node->true_node;
 		aux_c_node = aux_c_node->true_node;
-		printf("Cursor vale: %d\n", *cursor);
 	}
 	if (!is_empty(aux_stack))
 		return NULL;

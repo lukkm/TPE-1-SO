@@ -33,9 +33,10 @@ void ipc_close(ipc_params_t params){
 
 void ipc_send(ipc_params_t params, void * message, int size){
 	write(params->fd, message, size);
+	printf("Se mando algo\n");
 }
 
 
-int ipc_receive(ipc_params_t params, char * buffer, int size){
+int ipc_receive(ipc_params_t params, void * buffer, int size){
 	return read(params->fd, buffer, size);
 }

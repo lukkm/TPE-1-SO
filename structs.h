@@ -83,6 +83,12 @@ int type;
 int pid;
 } process;
 
+typedef struct shared_graph_header{
+	struct graph * mem_adress;	
+	int fd;
+	int size;
+}shared_graph_header;
+
 typedef struct client_header{
 int client_id;
 int program_size;
@@ -99,4 +105,5 @@ typedef graph_node * node_t;
 typedef graph * graph_t;
 typedef status * status_t;
 typedef ipc_params * ipc_params_t;
+typedef shared_graph_header * shared_graph_header_t;
 typedef client_header * client_header_t;

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <sys/shm.h>
 #include "../structs.h"
 #include "../defs.h"
 #include "../IPCS/ipcs.h"
@@ -27,45 +29,20 @@ int pre_execute(process_params_t params)
 
 int main(void)
 {
-	/*EN BASE A IPC ARMO STRUCTURA AUX PARA EL THREAD*/
-
-	/*Ejemplo	*/
-	/*process_params_t ej = (process_params_t) calloc(1,sizeof(struct process_params))*/
-	/*ej->c_status = (status_t) calloc(1,sizeof(struct status));
-	ej->params = 5;
-	ej->c_status->cursor = 30;
-	ej->c_status->flag = FALSE;
-	ej->c_status->id = 20;	
-	/*Fin de Ejemplo*/
-	
-	/* Useless */
-	
-	/*
-	inc_process = calloc(1, sizeof(struct process));
-	inc_process->params = calloc(1, sizeof (struct ipc_params));
-	inc_process->params->file = "/tmp/inc";
-	
-	process_params_t empty;
-	char line[100];	
-	pre_execute(empty);
-	printf("Test INC \n");
-	ipc_open(inc_process->params, O_RDONLY|O_NONBLOCK);
-	while(1){
-		if (ipc_receive(inc_process->params, line, 100) > 0){
-			printf("El proceso INC recibio: %s\n", line);
-		}
-		sleep(1);
-	}
-
-	*/
 	
 	char line[100];	
+	shared_graph_header header;
+	graph_t mem;
 	init_processes();
-	printf("Test inc \n");
-	ipc_open(inc_process->params, O_RDONLY|O_NONBLOCK);
+	printf("Test inc\n");
+	ipc_open(inc_process->params, O_RDONLY);
+	while(ipc_receive(inc_process->params, &header, sizeof(struct shared_graph_header)) == 0)
+		sleep(1);
 	while(1){
-		if (ipc_receive(inc_process->params, line, 100) > 0){
-			printf("El proceso INC recibio: %s\n", line);
+		if (ipc_receive(inc_process->params, line, 100) > 0){ 
+			if ( (mem = (graph_t)shmat(header.fd, header.mem_adress, 0)) == -1 ){
+				fatal("shmat");
+			}
 		}
 		sleep(1);
 	}
