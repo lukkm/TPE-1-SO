@@ -45,13 +45,6 @@ typedef struct{
 /* Mas informacion que pueda tener */
 } graph;
 
-typedef struct status{
-int cursor;
-int mem[1000];
-int flag;
-int id;
-} status;
-
 typedef struct process_params /*Estructura necesaria para los threads, se carga en base a las IPC's*/
 {
 struct status c_status;
@@ -116,7 +109,6 @@ typedef stack * stack_t;
 typedef node * stack_node;
 typedef graph_node * node_t;
 typedef graph * graph_t;
-typedef status * status_t;
 typedef ipc_params * ipc_params_t;
 typedef shared_graph_header * shared_graph_header_t;
 typedef client_header * client_header_t;
