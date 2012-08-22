@@ -1,28 +1,22 @@
 #include <pthread.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/shm.h>
+#include <semaphore.h>
 #include "../structs.h"
 #include "../defs.h"
+#include "../IPCS/ipcs.h"
 
-int pre_execute(process_params_t);
-void* execute_ml (void*);
+process_params_t pre_execute(status_t, int);
+void call_next_process(status, ipc_params_t);
+void* execute_dec (void*);
 void init_processes(void);
 
 process_t ml_process;
 
-
-int pre_execute(process_params_t params)
-{
-  
-	pthread_t thread_id;	
-	process_params_t thread_args = params;
-	//pthread_create(&thread_id, NULL, &execute_ml, &thread_args);
-	return 0;
-
-}
-
-
+sem_t sem;
 
 int main(void)
 {
