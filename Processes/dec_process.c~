@@ -39,7 +39,7 @@ int main(void)
 			sem_wait(&sem);
 			printf("Estado DESPUES: %d\n", c_program.mem[c_program.cursor]); 
 			mem->current = mem->current->true_node;
-			if (current != NULL)
+			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
 			shmdt(mem);
 		}

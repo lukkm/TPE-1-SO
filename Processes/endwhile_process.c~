@@ -30,7 +30,7 @@ int main(void)
 	ipc_open(endwhile_process->params, O_RDONLY);
 	while(1){
 		if (ipc_receive(endwhile_process->params, &c_program, sizeof(struct status)) > 0){ 
-			if ( (mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
+			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
 				fatal("shmat");
 			printf("ENDWHILE Process\n");
 			mem->current = mem->current->true_node;

@@ -14,7 +14,7 @@ void call_next_process(status, ipc_params_t);
 void* execute_cz (void*);
 void init_processes(void);
 
-process_t inc_process;
+process_t cz_process;
 
 sem_t sem;
 

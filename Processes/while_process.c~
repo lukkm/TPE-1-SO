@@ -1,9 +1,13 @@
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/shm.h>
+#include <semaphore.h>
 #include "../structs.h"
 #include "../defs.h"
+#include "../IPCS/ipcs.h"
 
 process_params_t pre_execute(status_t, int);
 void call_next_process(status, ipc_params_t);
@@ -19,7 +23,6 @@ int main(void)
 	pthread_t thread_id;
 
 	init_processes();
-	sem_init(&sem,0,0);
 	ipc_open(while_process->params, O_RDONLY);
 	while(1){
 		if (ipc_receive(while_process->params, &c_program, sizeof(struct status)) > 0){ 

@@ -67,7 +67,7 @@ main(void)
 			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
 				sleep(1);
-
+			
 			c_stack = parse_file(read_string);
 
 			c_graph = build_graph(c_stack);

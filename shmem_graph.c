@@ -24,9 +24,9 @@ graph_t create_sh_graph(graph_t c_graph, int size, int * memkey, shared_graph_he
 	int cursor;
 	void * mem;
 	
-	if ( (*memkey = shmget(IPC_PRIVATE, size, IPC_CREAT|0666)) == -1 )
+	if ( (long)(*memkey = shmget(IPC_PRIVATE, size, IPC_CREAT|0666)) == -1 )
 		fatal("shmget");
-	if ( (mem = shmat(*memkey, NULL, 0)) == -1 )
+	if ( (long)(mem = shmat(*memkey, NULL, 0)) == -1 )
 		fatal("shmat");
 	header->fd = *memkey;
 	header->mem_adress = mem; 
@@ -131,7 +131,10 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 			push(aux_stack, &aux_sh_node->false_node);
 		else
 			aux_sh_node->false_node = NULL;
-		aux_sh_node->true_node = sh_graph + *cursor;
+		if (aux_c_node->true_node != NULL)
+			aux_sh_node->true_node = sh_graph + *cursor;
+		else
+			aux_sh_node->true_node = NULL;
 		aux_sh_node = aux_sh_node->true_node;
 		aux_c_node = aux_c_node->true_node;
 	}

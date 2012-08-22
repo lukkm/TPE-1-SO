@@ -27,7 +27,7 @@ int main(void)
 
 	init_processes();
 	sem_init(&sem,0,0);
-	ipc_open(inc_process->params, O_RDONLY);
+	ipc_open(if_process->params, O_RDONLY);
 	while(1){
 		if (ipc_receive(if_process->params, &c_program, sizeof(struct status)) > 0){ 
 			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
@@ -41,6 +41,8 @@ int main(void)
 			mem->current = mem->current->true_node;
 			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			else
+				shmctl(c_program.g_header.fd, IPC_RMID, 0);
 			shmdt(mem);
 		}
 		sleep(1);

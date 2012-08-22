@@ -1,9 +1,13 @@
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/shm.h>
+#include <semaphore.h>
 #include "../structs.h"
 #include "../defs.h"
+#include "../IPCS/ipcs.h"
 
 process_params_t pre_execute(status_t, int);
 void call_next_process(status, ipc_params_t);
@@ -28,6 +32,8 @@ int main(void)
 			mem->current = mem->current->true_node;
 			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			else
+				shmctl(c_program.g_header.fd, IPC_RMID, 0);
 			shmdt(mem);
 		}
 		sleep(1);
