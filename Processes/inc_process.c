@@ -31,18 +31,15 @@ int main(void)
 {
 	
 	char line[100];	
-	shared_graph_header header;
+	program c_program;
 	graph_t mem;
 	init_processes();
 	printf("Test inc\n");
 	ipc_open(inc_process->params, O_RDONLY);
-	while(ipc_receive(inc_process->params, &header, sizeof(struct shared_graph_header)) == 0)
-		sleep(1);
 	while(1){
-		if (ipc_receive(inc_process->params, line, 100) > 0){ 
-			if ( (mem = (graph_t)shmat(header.fd, header.mem_adress, 0)) == -1 ){
+		if (ipc_receive(inc_process->params, &c_program, sizeof(struct program)) > 0){ 
+			if ( (mem = (graph_t)shmat(program.graph.fd, program.graph.mem_adress, 0)) == -1 )
 				fatal("shmat");
-			}
 		}
 		sleep(1);
 	}

@@ -9,9 +9,10 @@ typedef struct graph graph;*/
 
 
 typedef struct program{
-int * memory;
+int memory[1000];
 int current;
 int variable;
+struct shared_graph_header graph;
 } program;
 
 typedef struct instruction{
