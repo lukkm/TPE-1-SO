@@ -70,8 +70,20 @@ int fd;
 /* SHARED MEMORY PARAMS */
 int shm_segment_size;
 int segment_id;
-//char* shared_memory_address; IDIOTA!!!
+void* shared_memory_address; // IDIOTA VOS PUTO!!! //EL LUKO DIJO QUE ERA VOID
 //char* msg;
+
+/*------------------*/
+/* MESSAGE QUEUE PARAMS */
+
+int unique_mq_id;
+
+/*------------------*/
+
+/*------------------*/
+/* SOCKET PARAMS */
+
+int socket_fd;
 
 /*------------------*/
 
