@@ -20,7 +20,6 @@ sem_t sem;
 
 int main(void)
 {
-	char line[100];	
 	status c_program;
 	graph_t mem;
 	process_params_t thread_args;
@@ -40,9 +39,9 @@ int main(void)
 			sem_wait(&sem);
 			printf("Estado DESPUES: %d\n", c_program.mem[c_program.cursor]); 
 			mem->current = mem->current->true_node;
-			shmdt(mem);
 			if (current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			shmdt(mem);
 		}
 		sleep(1);
 	}

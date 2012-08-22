@@ -33,8 +33,6 @@ sem_t sem;
 
 int main(void)
 {
-	
-	char line[100];	
 	status c_program;
 	graph_t mem;
 	process_params_t thread_args;
