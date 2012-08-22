@@ -4,18 +4,22 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/shm.h>
+#include <semaphore.h>
 #include "../structs.h"
 #include "../defs.h"
 #include "../IPCS/ipcs.h"
 
-int pre_execute(process_params_t);
+process_params_t pre_execute(status_t, int);
+void call_next_process(status, ipc_params_t);
 void* execute_inc (void*);
 void init_processes(void);
 
 process_t inc_process;
 
+sem_t sem;
 
-int pre_execute(process_params_t params)
+
+/*int pre_execute(process_params_t params)
 {
   
 	pthread_t thread_id;	
@@ -23,7 +27,7 @@ int pre_execute(process_params_t params)
 	//pthread_create(&thread_id, NULL, &execute_inc, &thread_args);
 	return 0;
 
-}
+}*/
 
 
 
@@ -31,15 +35,28 @@ int main(void)
 {
 	
 	char line[100];	
-	program c_program;
+	status c_program;
 	graph_t mem;
+	process_params_t thread_args;
+	pthread_t thread_id;
+
 	init_processes();
+	sem_init(&sem,0,0);
 	printf("Test inc\n");
 	ipc_open(inc_process->params, O_RDONLY);
 	while(1){
-		if (ipc_receive(inc_process->params, &c_program, sizeof(struct program)) > 0){ 
-			if ( (mem = (graph_t)shmat(program.graph.fd, program.graph.mem_adress, 0)) == -1 )
+		if (ipc_receive(inc_process->params, &c_program, sizeof(struct status)) > 0){ 
+			printf("recibi uno\n");
+			if ( (mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
 				fatal("shmat");
+			thread_args = pre_execute(&c_program, mem->current->instruction_process->param);
+			printf("Estado ANTES: %d\n", c_program.mem[0]); 
+			pthread_create(&thread_id, NULL, &execute_inc, thread_args);			
+			sem_wait(&sem);
+			printf("Estado DESPUES: %d\n", c_program.mem[0]); 
+			mem->current = mem->current->true_node;
+			call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
+			shmdt(mem);
 		}
 		sleep(1);
 	}
@@ -51,7 +68,7 @@ int main(void)
 void* execute_inc (void* structure_params)
 {
 	process_params_t par = (process_params_t) structure_params;
-	par->c_status.mem[par->c_status.cursor] += par->param;
+	par->c_status->mem[par->c_status->cursor] += par->param;
+	sem_post(&sem);	
 	return NULL;
 }
-

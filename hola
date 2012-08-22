@@ -1,7 +1,2 @@
-Inc(5) Dec(8)
+Inc(5) Inc(3)
 Dec(2)
-IF(1,IF(9,Inc(2)) Dec(3) ENDIF(9))
-IF(3,Dec(9) Inc(3) MR(8) ML(100))
-Dec(6)
-ENDIF(3)
-ENDIF(1)

@@ -16,6 +16,8 @@
 #include "Data_Structures/stack.h"
 #include "IPCS/ipcs.h"
 
+node_t copy_graph(node_t, void *, int *);
+
 graph_t create_sh_graph(graph_t c_graph, int size, int * memkey, shared_graph_header_t header)
 {
 	graph_t sh_graph;

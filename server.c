@@ -36,7 +36,6 @@ void init_processes(void);
 void fatal(char *s);
 graph_t create_sh_graph(graph_t, int, int*, shared_graph_header_t);
 int get_graph_size(graph_t);
-node_t copy_graph(node_t, void *, int *);
 
 int
 main(void) 
@@ -49,7 +48,8 @@ main(void)
 	char * read_string;
 	int aux_size;
 	int memkey;
-	shared_graph_header g_header;
+	process_t process_type;
+	status client_program;
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
 
@@ -58,26 +58,30 @@ main(void)
 	server_params->file = "/tmp/server";
 	ipc_create(server_params);
 	ipc_open(server_params, O_RDONLY);
-	while(1){
-		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0){
+	while(1)
+	{
+		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0)
+		{
 			
 			read_string = calloc(1, header->program_size);
 			
-			while(ipc_receive(server_params, read_string, header->program_size) == 0){
+			while(ipc_receive(server_params, read_string, header->program_size) == 0)
 				sleep(1);
-			} 
 
 			c_stack = parse_file(read_string);
 
 			c_graph = build_graph(c_stack);
 
-			if (c_graph != NULL){
+			if (c_graph != NULL)
+			{
 				create_sh_graph(c_graph, get_graph_size(c_graph), 
-								&memkey, &g_header);
-				ipc_send(inc_process->params, &g_header, sizeof(struct shared_graph_header));
-				ipc_send(inc_process->params, "holis", 5);
+								&memkey, &client_program.g_header);
+				client_program.cursor = 0;
+				client_program.flag = FALSE;
+				process_type = c_graph->first->instruction_process->instruction_type;
+				ipc_send(process_type->params, &client_program, sizeof(struct status));
 			}else{
-				printf("Escribi bien, pelotudo\n");
+				printf("Entrada incorrecta\n");
 			}
 		}
 		sleep(1);

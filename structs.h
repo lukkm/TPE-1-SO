@@ -1,9 +1,15 @@
-typedef struct program{
-	int memory[1000];
-	int current;
-	int variable;
-	struct shared_graph_header graph;
-} program;
+typedef struct shared_graph_header{
+	struct graph * mem_adress;	
+	int fd;
+	int size;
+}shared_graph_header;
+
+typedef struct status{
+	int mem[1000];
+	int cursor;
+	int flag;
+	struct shared_graph_header g_header;
+} status;
 
 typedef struct instruction{
 		struct process * instruction_type;
@@ -36,7 +42,7 @@ typedef struct{
 } graph;
 
 typedef struct process_params{
-	struct status c_status;
+	struct status * c_status;
 	int param;
 } process_params;
 
@@ -78,12 +84,6 @@ typedef struct process{
 	int pid;
 } process;
 
-typedef struct shared_graph_header{
-	struct graph * mem_adress;	
-	int fd;
-	int size;
-}shared_graph_header;
-
 typedef struct client_header{
 	int client_id;
 	int program_size;
@@ -91,7 +91,7 @@ typedef struct client_header{
 
 
 typedef process_params * process_params_t;
-typedef program * program_t;
+typedef status * status_t;
 typedef process * process_t;
 typedef instruction * instruction_t;
 typedef stack * stack_t;
