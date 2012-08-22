@@ -70,6 +70,11 @@ graph_t build_graph(stack_t instructions)
 				return NULL;
 			new_node->conditional_expr = expr_graph->first;
 			aux_cond_node = expr_graph->first;
+			do
+			{
+				aux_cond_node = aux_cond_node->true_node;
+			} while (aux_cond_node->true_node != NULL);
+			aux_cond_node->true_node = new_node;
         }
             
         new_graph->first = new_node;
