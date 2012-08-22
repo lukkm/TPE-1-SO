@@ -18,4 +18,6 @@
 #define ENDIF 6
 #define WHILE 7
 #define ENDWHILE 8
+#define MAXPRIOR 10
+#define QPERM 0660
 
