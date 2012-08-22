@@ -30,7 +30,7 @@ int main(void)
 	ipc_open(dec_process->params, O_RDONLY);
 	while(1){
 		if (ipc_receive(dec_process->params, &c_program, sizeof(struct status)) > 0){ 
-			if ( (mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
+			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
 				fatal("shmat");
 			thread_args = pre_execute(&c_program, mem->current->instruction_process->param);
 			printf("Dec Process\n");
@@ -39,7 +39,7 @@ int main(void)
 			sem_wait(&sem);
 			printf("Estado DESPUES: %d\n", c_program.mem[c_program.cursor]); 
 			mem->current = mem->current->true_node;
-			if (current != NULL)
+			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
 			shmdt(mem);
 		}

@@ -30,13 +30,11 @@ int main(void)
 	ipc_open(endif_process->params, O_RDONLY);
 	while(1){
 		if (ipc_receive(endif_process->params, &c_program, sizeof(struct status)) > 0){ 
-			if ( (mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
+			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
 				fatal("shmat");
 			thread_args = pre_execute(&c_program, mem->current->instruction_process->param);
 			printf("endif process\n");			
 			printf("Estado ANTES: %d\n", c_program.mem[c_program.cursor]); 
-			pthread_create(&thread_id, NULL, &execute_endif, thread_args);			
-			sem_wait(&sem);
 			printf("Estado DESPUES: %d\n", c_program.mem[c_program.cursor]); 
 			mem->current = mem->current->true_node;
 			if (mem->current != NULL)
@@ -47,14 +45,4 @@ int main(void)
 	}
 	
 	return 0;
-}
-
-
-
-void* execute_endif (void* structure_params)
-{
-	process_params_t par = (process_params_t) structure_params;
-	
-	printf("WTF \n");
-	return NULL;
 }

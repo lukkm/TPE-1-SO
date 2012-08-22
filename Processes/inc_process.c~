@@ -19,22 +19,8 @@ process_t inc_process;
 sem_t sem;
 
 
-/*int pre_execute(process_params_t params)
-{
-  
-	pthread_t thread_id;	
-	process_params_t thread_args = params;
-	//pthread_create(&thread_id, NULL, &execute_inc, &thread_args);
-	return 0;
-
-}*/
-
-
-
 int main(void)
 {
-	
-	char line[100];	
 	status c_program;
 	graph_t mem;
 	process_params_t thread_args;
@@ -45,7 +31,7 @@ int main(void)
 	ipc_open(inc_process->params, O_RDONLY);
 	while(1){
 		if (ipc_receive(inc_process->params, &c_program, sizeof(struct status)) > 0){ 
-			if ( (mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
+			if ( (int)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )
 				fatal("shmat");
 			thread_args = pre_execute(&c_program, mem->current->instruction_process->param);
 			printf("Inc process\n");			
