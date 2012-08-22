@@ -14,7 +14,6 @@ int current;
 int variable;
 } program;
 
-
 typedef struct instruction{
 struct process * instruction_type;
 int param;
@@ -40,7 +39,8 @@ struct graph_node * conditional_expr;
 } graph_node;
 
 typedef struct{
-struct graph_node * first;
+	struct graph_node * first;
+	struct graph_node * current;
 /* Mas informacion que pueda tener */
 } graph;
 
@@ -60,7 +60,6 @@ int param;
 typedef struct ipc_params{
 
 /*------------------*/
-
 /* FIFO PARAMS */
 char * file;
 int action;
@@ -71,7 +70,7 @@ int fd;
 /* SHARED MEMORY PARAMS */
 int shm_segment_size;
 int segment_id;
-char* shared_memory_address;
+//char* shared_memory_address; IDIOTA!!!
 //char* msg;
 
 /*------------------*/

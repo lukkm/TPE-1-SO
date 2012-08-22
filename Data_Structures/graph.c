@@ -83,9 +83,9 @@ int get_params_size(ipc_params_t params)
 		return 0;
 
 	if (params->file != NULL)
-		str_size += strlen(params->file);
-	if (params->shared_memory_address != NULL)
-		str_size += strlen(params->shared_memory_address);
+		str_size += strlen(params->file) + 1;
+	/*if (params->shared_memory_address != NULL)
+		str_size += strlen(params->shared_memory_address)+1;*/
 	return sizeof(ipc_params) + str_size*sizeof(char);
 }
 
@@ -102,8 +102,8 @@ int get_instr_size(instruction_t instr)
 	if (instr == NULL)
 		return 0;
 
-	if (instr->expr != NULL)
-		str_size = strlen(instr->expr)*sizeof(char);
+	if (instr->expr != NULL);
+		//str_size = strlen(instr->expr)*sizeof(char)+1;
 		
 	return sizeof(instruction) + str_size +
 			get_process_t_size(instr->instruction_type);
