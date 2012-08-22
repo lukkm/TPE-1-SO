@@ -1,5 +1,5 @@
 rm /tmp/server
-gcc -g -o soserver server.c parser.c Data_Structures/graph.c Data_Structures/stack.c IPCS/fifo.c IPCS/ipcs_protocol.c
+gcc -g -o soserver server.c parser.c Data_Structures/graph.c Data_Structures/stack.c IPCS/fifo.c IPCS/ipcs_protocol.c shmem_graph.c
 gcc -g -o Processes/inc Processes/inc_process.c IPCS/fifo.c IPCS/ipcs_protocol.c
 gcc -g -o Processes/dec Processes/dec_process.c IPCS/fifo.c IPCS/ipcs_protocol.c
 gcc -g -o Processes/mr Processes/mr_process.c IPCS/fifo.c IPCS/ipcs_protocol.c
