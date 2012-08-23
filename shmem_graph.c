@@ -114,7 +114,8 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 	int aux_size, aux_type, flag = 0;
 	node_t aux_sh_node, aux_c_node = c_node, sh_node;
 	stack_t aux_stack = create_stack();
-	
+	void * super_aux;
+
 	if (c_node == NULL)
 		return NULL;
 	sh_node = sh_graph + *cursor;
@@ -130,7 +131,7 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 		{
 			if (!is_empty(aux_stack))
 			{
-				*((node_t*)pop(aux_stack)) = aux_sh_node;
+				*((node_t*)pop(aux_stack)->info) = aux_sh_node;
 				flag = 0;
 			} else {
 				return NULL;

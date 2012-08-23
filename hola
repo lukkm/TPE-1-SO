@@ -1,3 +1,5 @@
-IF(1,Inc(4))
-Dec(3)
+Inc(4)
+IF(1,Inc(2) Inc(50) Dec(80) CZ)
+Inc(3)
 ENDIF(1)
+Inc(1)
