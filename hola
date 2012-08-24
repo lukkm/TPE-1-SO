@@ -1,5 +1,4 @@
-Inc(4)
-IF(1,Inc(2) Inc(50) Dec(80) CZ)
+WHILE(1,CZ Inc(1000))
 Inc(3)
-ENDIF(1)
+ENDWHILE(1)
 Inc(1)

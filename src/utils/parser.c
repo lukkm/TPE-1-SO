@@ -48,7 +48,7 @@ stack_t parse_file(char * file_adress){
 	if (file == NULL)
 		return NULL;
 	stack_t stack = create_stack();
-	char line[MAX_INSTRUCTION_LENGTH];	
+	char * line = calloc(MAX_INSTRUCTION_LENGTH, sizeof(char));
 	while(!feof(file)){
 		i = 0;
 		while((c = fgetc(file)) != '\n' && !feof(file)){
@@ -57,8 +57,6 @@ stack_t parse_file(char * file_adress){
 		line[i] = 0;
 		if(*line != 0 && parse_string(line, stack) == -1)
 			return NULL;
-		//if (select_instruction(line, stack) == -1)
-		//	return NULL;
 		CLEAN_LINE;
 	}
 	return stack;
@@ -87,10 +85,9 @@ void set_lists(){
 }
 
 int parse_string(char * string, stack_t c_stack){
-	int i = 0;//, size;
+	int i = 0;
 	int count = 0, flag = 0;
 	char * aux_str;
-//	char line[MAX_INSTRUCTION_LENGTH];
 	
 	while(string[i]){
 		if (string[i] == '(') {
@@ -104,24 +101,23 @@ int parse_string(char * string, stack_t c_stack){
 				if (select_instruction(string, c_stack) == -1)
 					return -1;
 				string = aux_str;
-				flag = 0;
+				flag = 0;;
 				i = -1;
 			}
+		} else if (!strncmp(string, "CZ", 2)){
+			i+=2;
+			string[i] = 0;
+			aux_str = string+i+1;
+			if (select_instruction(string, c_stack) == -1)
+				return -1;
+			string = aux_str;
+			i = -1;
 		}
 		i++;
 		
 	}
 	if (i)
 		return select_instruction(string, c_stack);
-
-/*	while(string[i]){
-		sscanf(string+i, "%s ", line);
-		size = strlen(line);
-		if (select_instruction(line, c_stack) == -1)
-			return -1;
-		i += size;
-		while(string[i] == ' ') i++;
-	}*/
 	return 0;
 }
 
@@ -237,11 +233,18 @@ int parse_endif(char * instr, stack_t stack, instruction_t new_instr){
 }
 
 int parse_while(char * instr, stack_t stack, instruction_t new_instr){
-	int num;
-	char expr[MAX_INSTRUCTION_LENGTH];
-	if (sscanf(instr, "WHILE(%d,%s)", &num, expr) == 2){
+	int num, size, i = 0;
+	char * pos;
+	char * expr = calloc(1, MAX_INSTRUCTION_LENGTH);
+	if (sscanf(instr, "WHILE(%d,", &num)){
 		new_instr->instruction_type = while_process;
 		new_instr->param = num;
+		pos = strchr(instr, ',') + 1;
+		while(pos[i] != 0){
+			expr[i] = pos[i];
+			i++;		
+		}
+		expr[strlen(expr)-1] = 0;
 		new_instr->expr = expr;
 		if (push(stack, new_instr) == -1)
 			return -1;

@@ -42,6 +42,8 @@ void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 	node_t sh_node;
 	node_t aux_sh_cond;
 	node_t aux_cond;
+	node_t aux_while;
+	node_t aux_sh_while;
 	int aux_size, start = *cursor;
 	
 	if (cur_node == NULL)
@@ -86,6 +88,18 @@ void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 			aux_sh_cond = aux_sh_cond->true_node;
 		}
 		aux_sh_cond->true_node = sh_node;
+	}
+	if (cur_node->instruction_process->instruction_type->type == WHILE){
+		aux_while = cur_node->true_node;
+		aux_sh_while = (node_t)copy_node(sh_graph, aux_while, cursor);
+		sh_node->true_node = aux_sh_while;
+		while (aux_while->true_node != cur_node)
+		{
+			aux_sh_while->true_node = (node_t)copy_node(sh_graph, aux_while->true_node, cursor);
+			aux_while = aux_while->true_node;
+			aux_sh_while = aux_sh_while->true_node;
+		}
+		aux_sh_while->true_node = sh_node;
 	}
 	return sh_node;
 }
@@ -139,18 +153,29 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 		}
 		aux_type = 
 				aux_c_node->instruction_process->instruction_type->type;
-		if (aux_type == ENDIF || aux_type == ENDWHILE)
+		if (aux_type == ENDIF)
 			flag = 1;
-		if (aux_c_node->false_node != NULL)
+		if (aux_type == IF)
 			push(aux_stack, &aux_sh_node->false_node);
 		else
 			aux_sh_node->false_node = NULL;
-		if (aux_c_node->true_node != NULL)
+		if (aux_c_node->true_node != NULL && aux_type != WHILE)
 			aux_sh_node->true_node = sh_graph + *cursor;
-		else
+		else if (aux_type == WHILE){
+			if(aux_c_node->false_node != NULL)
+				aux_sh_node->false_node = sh_graph + *cursor;
+			else
+				aux_sh_node->false_node = NULL;
+		}else
 			aux_sh_node->true_node = NULL;
-		aux_sh_node = aux_sh_node->true_node;
-		aux_c_node = aux_c_node->true_node;
+		
+		if(aux_type != WHILE){
+			aux_sh_node = aux_sh_node->true_node;
+			aux_c_node = aux_c_node->true_node;
+		}else{
+			aux_sh_node = aux_sh_node->false_node;
+			aux_c_node = aux_c_node->false_node;
+		}
 	}
 	if (!is_empty(aux_stack))
 		return NULL;

@@ -119,6 +119,7 @@ int get_instr_size(instruction_t instr)
 int get_node_size(node_t cur_node)
 {
 	int cond_size = 0;
+	int true_size = 0;
 	if (cur_node == NULL)
 		return 0;
 	if (cur_node->conditional_expr != NULL)
@@ -129,6 +130,21 @@ int get_node_size(node_t cur_node)
 			cond_size = get_node_size(cur_node->conditional_expr);
 		} else {
 			cur_node->cond_executed = 0;
+			return 0;
+		}
+	}
+	if (cur_node->instruction_process->instruction_type->type == WHILE){
+		if (!cur_node->while_executed)
+		{
+			cur_node->while_executed = 1;
+			true_size = get_node_size(cur_node->true_node);
+			return get_node_size(cur_node->false_node) + 
+			cond_size + true_size + 
+			sizeof(graph_node) + 
+			get_instr_size(cur_node->instruction_process);
+		} else {
+			cur_node->while_executed = 0;
+			return 0;
 		}
 	}
 	return get_node_size(cur_node->true_node) + 

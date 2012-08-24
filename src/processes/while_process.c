@@ -31,8 +31,8 @@ int main(void)
 				fatal("shmat");
 			printf("WHILE Process\n");
 			if (!mem->current->cond_executed){
-				mem->current = mem->current->conditional_expr;
 				mem->current->cond_executed = 1;
+				mem->current = mem->current->conditional_expr;
 			}else{
 				mem->current->cond_executed = 0;
 				if (c_program.flag){

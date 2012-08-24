@@ -45,12 +45,10 @@ int main(void)
 				}
 			}
 			if (mem->current != NULL){
-				putchar('x');
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
 			}
 			else {
 				shmctl(c_program.g_header.fd, IPC_RMID, 0);
-				putchar('y');
 			}
 			shmdt(mem);
 		}

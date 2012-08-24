@@ -34,6 +34,7 @@ typedef struct graph_node{
 	struct graph_node * false_node;
 	struct graph_node * conditional_expr;
 	int cond_executed;
+	int while_executed;
 } graph_node;
 
 typedef struct{
