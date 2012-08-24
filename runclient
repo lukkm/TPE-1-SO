@@ -1,2 +1,1 @@
-gcc -g -o bin/soclient src/client.c src/ipcs/fifo.c
-./bin/soclient
+gcc -g -o bin/soclient src/client.c src/ipcs/fifo.c src/utils/ipcs_protocol.c

@@ -16,6 +16,7 @@ void* execute_inc (void*);
 void init_processes(void);
 
 process_t inc_process;
+ipc_params_t server_receive_params;
 
 sem_t sem;
 
@@ -43,8 +44,10 @@ int main(void)
 			mem->current = mem->current->true_node;
 			if (mem->current != NULL)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
-			else
+			else{
+				call_next_process(c_program, server_receive_params);
 				shmctl(c_program.g_header.fd, IPC_RMID, 0);
+			}
 			shmdt(mem);
 		}
 		sleep(1);

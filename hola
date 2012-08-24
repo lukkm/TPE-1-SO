@@ -1,4 +1,16 @@
-WHILE(1,CZ Inc(1000))
+WHILE(1,CZ Inc(1000)) Inc(2)
 Inc(3)
 ENDWHILE(1)
 Inc(1)
+MR(50) Inc(800) ML(2) Inc(6) Dec(5)
+MR(8000)
+Inc(7)
+ML(2)
+IF(2,CZ)
+Inc(4)
+ENDIF(2)
+CZ
+Inc(30)
+ML(20)
+Inc(9000000)
+CZ

@@ -15,6 +15,7 @@ void call_next_process(status, ipc_params_t);
 void init_processes(void);
 
 process_t if_process;
+ipc_params_t server_receive_params;
 
 sem_t sem;
 
@@ -48,6 +49,7 @@ int main(void)
 				call_next_process(c_program, mem->current->instruction_process->instruction_type->params);
 			}
 			else {
+				call_next_process(c_program, server_receive_params);
 				shmctl(c_program.g_header.fd, IPC_RMID, 0);
 			}
 			shmdt(mem);

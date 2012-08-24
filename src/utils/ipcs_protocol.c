@@ -20,14 +20,32 @@ process_t endif_process;
 process_t while_process;
 process_t endwhile_process;
 
+ipc_params_t server_receive_params;
+ipc_params_t server_params;
+ipc_params_t client_params;
+
 process_t * process_list[CANT_INSTRUCTIONS];
 char * process_name_list[CANT_INSTRUCTIONS];
-
-ipc_params_t ipcs_com_info[CANT_INSTRUCTIONS * CANT_INSTRUCTIONS];
 
 void init_processes(){
 	
 	int i;
+	
+	char * ct_sv_rec_params = "/tmp/sv_receive";
+	char * ct_sv_params = "/tmp/server";
+	char * ct_cl_params = "/tmp/client";
+	
+	server_receive_params = calloc(1, sizeof(struct ipc_params));
+	server_receive_params->file = calloc(1, strlen(ct_sv_rec_params) + 1);
+	strcpy(server_receive_params->file, ct_sv_rec_params);
+	
+	server_params = calloc(1,sizeof(struct ipc_params));
+	server_params->file = calloc(1, strlen(ct_sv_params) + 1);
+	strcpy(server_params->file, ct_sv_params);
+
+	client_params = calloc(1,sizeof(struct ipc_params));
+	client_params->file = calloc(1, strlen(ct_cl_params) + 1);
+	strcpy(client_params->file, ct_cl_params);
 
 	process_list[0] = &inc_process;
 	process_list[1] = &dec_process; 
@@ -79,10 +97,8 @@ void create_processes_information(){
 		(*(process_list[i]))->params = calloc(1, sizeof(struct ipc_params));
 		string_length = strlen(process_name_list[i]) +  TMP_LENGTH + 1;
 		string_name = calloc(1, string_length);
-		for (j = 0; j < TMP_LENGTH; j++)
-			string_name[j] = ct_tmp[j];
-		for (j = 0; j < string_length - TMP_LENGTH; j++)
-			string_name[j+TMP_LENGTH] = process_name_list[i][j];
+		strcpy(string_name, ct_tmp);
+		strcat(string_name, process_name_list[i]);
 		string_name[string_length - 1] = 0;
 		(*(process_list[i]))->params->file = string_name;
 	}

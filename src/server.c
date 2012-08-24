@@ -27,9 +27,12 @@ extern process_t endif_process;
 extern process_t while_process;
 extern process_t endwhile_process;
 
+extern ipc_params_t server_receive_params;
+extern ipc_params_t server_params;
+extern ipc_params_t client_params;
+
 extern process_t * process_list[CANT_INSTRUCTIONS];
 extern char * process_name_list[CANT_INSTRUCTIONS];
-extern ipc_params_t ipcs_com_info[CANT_INSTRUCTIONS * (CANT_INSTRUCTIONS - 1)];
 
 void init(void);
 void init_processes(void);
@@ -40,24 +43,20 @@ int get_graph_size(graph_t);
 int
 main(void) 
 {
-	init_processes();
-	init();
 	stack_t c_stack;
 	graph_t c_graph;
 
 	char * read_string;
 	int aux_size;
-	int memkey;
+	int memkey, i;
 	process_t process_type;
 	status client_program;
 	
+	init_processes();
+	init();
+	
 	client_header_t header = calloc(1, sizeof(struct client_header));
-
-
-	ipc_params_t server_params = calloc(1,sizeof(struct ipc_params));
-	server_params->file = "/tmp/server";
-	ipc_create(server_params);
-	ipc_open(server_params, O_RDONLY);
+	
 	while(1)
 	{
 		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0)
@@ -67,6 +66,8 @@ main(void)
 			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
 				sleep(1);
+				
+			printf("Recibi programa del cliente: %d\n", header->client_id);
 			
 			c_stack = parse_file(read_string);
 
@@ -78,11 +79,19 @@ main(void)
 								&memkey, &client_program.g_header);
 				client_program.cursor = 0;
 				client_program.flag = FALSE;
+				for(i = 0; i < MEM_SIZE; i++){
+					client_program.mem[i] = 0;
+				}
 				process_type = c_graph->first->instruction_process->instruction_type;
 				ipc_send(process_type->params, &client_program, sizeof(struct status));
 			}else{
 				printf("Entrada incorrecta\n");
 			}
+		}
+		if (ipc_receive(server_receive_params, &client_program, sizeof(struct status))){
+			ipc_open(client_params, O_WRONLY);
+			ipc_send(client_params, &client_program, sizeof(struct status));
+			ipc_close(client_params);
 		}
 		sleep(1);
 	}
@@ -98,29 +107,15 @@ void init(){
 	char * to_exec;
 	char * ct_bin = "bin/";
 	
-	int com_length;
-	char * com_file;
+	ipc_create(server_params);
+	ipc_open(server_params, O_RDONLY);
 	
-	
+	ipc_create(server_receive_params);
+	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
 		
 		ipc_create((*process_list[i])->params);
-		
-		for(j = 0; j < CANT_INSTRUCTIONS; j++){
-			if (i != j){
-				com_length = strlen((*process_list[i])->params->file) + strlen(process_name_list[j])+1;
-				com_file = calloc(1, com_length);
-				strcpy(com_file, (*process_list[i])->params->file);
-				strcat(com_file, process_name_list[j]);
-				com_file[com_length-1] = 0;
-				ipc_params_t ipc_com = calloc(1, sizeof(struct ipc_params));
-				ipc_com->file = com_file;
-				ipcs_com_info[i*(CANT_INSTRUCTIONS) + j] = ipc_com;
-				ipc_create(ipc_com);
-				free(com_file);
-			}
-		}
 		
 		switch(pid = fork()){
 			case -1:

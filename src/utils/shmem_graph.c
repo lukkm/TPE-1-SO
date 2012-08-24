@@ -153,8 +153,9 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 		}
 		aux_type = 
 				aux_c_node->instruction_process->instruction_type->type;
-		if (aux_type == ENDIF)
+		if (aux_type == ENDIF){
 			flag = 1;
+		}
 		if (aux_type == IF)
 			push(aux_stack, &aux_sh_node->false_node);
 		else
@@ -177,7 +178,12 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 			aux_c_node = aux_c_node->false_node;
 		}
 	}
-	if (!is_empty(aux_stack))
-		return NULL;
+	if (!is_empty(aux_stack)){
+		if (flag){
+			*((node_t*)pop(aux_stack)->info) = NULL;
+		}else{
+			return NULL;
+		}
+	}
 	return sh_node;
 }
