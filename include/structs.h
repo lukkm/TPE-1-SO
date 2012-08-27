@@ -84,8 +84,8 @@ typedef struct ipc_params{
 	/* SOCKET PARAMS */
 
 	char* socket_name;
-	int sockfd;
-	int client_sockfd;
+	unsigned int sockfd;
+	unsigned int client_sockfd;
 
 	/*------------------*/
 
