@@ -67,7 +67,7 @@ main(void)
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
 				sleep(1);
 				
-			printf("Recibi programa del cliente: %d\n", header->client_id);
+			printf("Recibi programa del cliente: %d, programa: %s\n", header->client_id, read_string);
 			
 			c_stack = parse_file(read_string);
 
@@ -83,6 +83,7 @@ main(void)
 					client_program.mem[i] = 0;
 				}
 				process_type = c_graph->first->instruction_process->instruction_type;
+				client_program.mtype = process_type->params->unique_mq_id;
 				ipc_send(process_type->params, &client_program, sizeof(struct status));
 			}else{
 				printf("Entrada incorrecta\n");
@@ -136,6 +137,7 @@ void init(){
 				exit(1);
 				break;
 		}
+		printf("Conectando a: %s mediante %d\n", to_exec, (*(process_list[i]))->params->mq_id);
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		
 	}

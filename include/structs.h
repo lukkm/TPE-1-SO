@@ -5,6 +5,7 @@ typedef struct shared_graph_header{
 }shared_graph_header;
 
 typedef struct status{
+	long mtype;
 	int mem[1000];
 	int cursor;
 	int flag;
@@ -67,6 +68,7 @@ typedef struct ipc_params{
 	/*------------------*/
 	/* MESSAGE QUEUE PARAMS */
 
+	int mq_id;
 	int unique_mq_id;
 
 	/*------------------*/

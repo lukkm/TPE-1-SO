@@ -38,14 +38,17 @@ void init_processes(){
 	server_receive_params = calloc(1, sizeof(struct ipc_params));
 	server_receive_params->file = calloc(1, strlen(ct_sv_rec_params) + 1);
 	strcpy(server_receive_params->file, ct_sv_rec_params);
+	server_receive_params->mq_id = 30000;
 	
 	server_params = calloc(1,sizeof(struct ipc_params));
 	server_params->file = calloc(1, strlen(ct_sv_params) + 1);
 	strcpy(server_params->file, ct_sv_params);
+	server_params->mq_id = 30001;
 
 	client_params = calloc(1,sizeof(struct ipc_params));
 	client_params->file = calloc(1, strlen(ct_cl_params) + 1);
 	strcpy(client_params->file, ct_cl_params);
+	client_params->mq_id = 30002;
 
 	process_list[0] = &inc_process;
 	process_list[1] = &dec_process; 
@@ -69,7 +72,6 @@ void init_processes(){
 
 	for (i = 0; i < CANT_INSTRUCTIONS; i++){
 		*(process_list[i]) = calloc(1, sizeof(struct process));
-		(*(process_list[i]))->params = calloc(1, sizeof(struct ipc_params));
 	}
 
 	inc_process->type = INC;
@@ -101,5 +103,6 @@ void create_processes_information(){
 		strcat(string_name, process_name_list[i]);
 		string_name[string_length - 1] = 0;
 		(*(process_list[i]))->params->file = string_name;
+		(*(process_list[i]))->params->mq_id = 40000+i;
 	}
 }

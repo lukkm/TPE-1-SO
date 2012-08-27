@@ -26,6 +26,7 @@ int main(void)
 
 	init_processes();
 	ipc_open(while_process->params, O_RDONLY);
+	printf("WHILE IPCS: %d\n", while_process->params->unique_mq_id);
 	while(1){
 		if (ipc_receive(while_process->params, &c_program, sizeof(struct status)) > 0){ 
 			if ( (long)(mem = (graph_t)shmat(c_program.g_header.fd, c_program.g_header.mem_adress, 0)) == -1 )

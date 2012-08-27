@@ -44,7 +44,9 @@ void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 	node_t aux_cond;
 	node_t aux_while;
 	node_t aux_sh_while;
+	stack_t aux_stack = create_stack();
 	int aux_size, start = *cursor;
+	int aux_type, flag = 0;
 	
 	if (cur_node == NULL)
 		return NULL;
@@ -93,14 +95,43 @@ void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 		aux_while = cur_node->true_node;
 		aux_sh_while = (node_t)copy_node(sh_graph, aux_while, cursor);
 		sh_node->true_node = aux_sh_while;
-		while (aux_while->true_node != cur_node)
+		while (aux_while->true_node != cur_node && (aux_type != ENDWHILE || aux_while->false_node != cur_node))
 		{
-			aux_sh_while->true_node = (node_t)copy_node(sh_graph, aux_while->true_node, cursor);
-			aux_while = aux_while->true_node;
-			aux_sh_while = aux_sh_while->true_node;
-		}
-		aux_sh_while->true_node = sh_node;
-	}
+			if (flag)
+			{
+				if (!is_empty(aux_stack))
+				{
+					*((node_t*)pop(aux_stack)->info) = aux_sh_while;
+					flag = 0;
+				} else {
+					return NULL;
+				}
+			}
+			aux_type = aux_while->instruction_process->instruction_type->type;
+			if(aux_type == ENDIF)
+				flag = 1;
+			if (aux_type == IF)
+				push(aux_stack, &aux_sh_while->false_node);
+			if (aux_while->true_node != cur_node && aux_type != WHILE){
+				aux_sh_while->true_node = (node_t)copy_node(sh_graph, aux_while->true_node, cursor);
+				aux_while = aux_while->true_node;
+				aux_sh_while = aux_sh_while->true_node;
+			}
+			else if (aux_type == WHILE){
+				if(aux_while->false_node != cur_node){
+					aux_sh_while->false_node = (node_t)copy_node(sh_graph, aux_while->false_node, cursor);
+				}else{
+					aux_sh_while->false_node = cur_node;
+				}
+				aux_while = aux_while->false_node;
+				aux_sh_while = aux_sh_while->false_node;
+			}
+		} 
+		if (!is_empty(aux_stack))
+			*((node_t*)pop(aux_stack)->info) = sh_node;
+		else
+			aux_sh_while->true_node = sh_node;
+	} 
 	return sh_node;
 }
 

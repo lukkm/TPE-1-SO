@@ -40,9 +40,12 @@ int main(void)
 			}else{
 				mem->current->cond_executed = 0;
 				if (c_program.flag){
+					printf("voy true\n");
 					mem->current = mem->current->true_node;
 				}else{
+					printf("voy false\n");
 					mem->current = mem->current->false_node;
+					printf("%p\n", mem->current);
 				}
 			}
 			if (mem->current != NULL){

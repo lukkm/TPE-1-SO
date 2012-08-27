@@ -3,16 +3,28 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/msg.h>
+#include <errno.h>
 
 #include "../../include/structs.h"
-#include "../../include/parser.h"
+#include "../../include/utils/parser.h"
 #include "../../include/defs.h"
 #include "../../include/data_structures/graph.h"
-#include "../../include/data_ztructures/stack.h"
+#include "../../include/data_structures/stack.h"
 #include "../../include/ipcs/ipcs.h"
 
-void ipc_create_msgqueue(ipc_params_t params);
+struct msg{
+	long mtype;
+	char info[MAX_IPC_SIZE];
+};
 
+void
+fatal(char *s)
+{
+	perror(s);
+	exit(1);
+}
+
+/*
 int main()
 {
 
@@ -45,7 +57,7 @@ int main()
 			
 		  }
  return 0;
-}
+}*/
 
 /*
 struct q_msg{
@@ -54,51 +66,59 @@ struct q_msg{
  char mtext[200];
 };*/
 
-void ipc_create_msgqueue(ipc_params_t params){	
-		
-	if ((params->unique_mq_id = msgget((key_t)IPC_PRIVATE, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR)) ==-1)
-		perror("Error in MessageQueue Allocation");  //VER PERMISOS
-	else			
-	 printf("Message Queue alocada en %d \n", params->unique_mq_id);
-	return;
+void ipc_create(ipc_params_t params){	
+		/*printf("Conectado a la única Message Queue ID: %d\n", params->unique_mq_id);*/
 }
 
 void ipc_open(ipc_params_t params, int action){
-
-	printf("Conectado a la única Message Queue ID: %d\n", params->unique_mq_id);
+	
+	//IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR
+	
+	struct msqid_ds sets;
+	sets.msg_qbytes = 32768l;
+	
+	if ((params->unique_mq_id = msgget((key_t)params->mq_id, IPC_CREAT | 0666)) ==-1)
+		perror("Error in MessageQueue Allocation");  //VER PERMISOS
+	else			
+	 printf("Message Queue alocada en %d \n", params->unique_mq_id);
+	msgctl(params->unique_mq_id, IPC_SET, &sets);
+	msgctl(params->unique_mq_id, IPC_STAT, &sets);
+	printf("Tamanio de la queue: %ul\n", (unsigned long)sets.msg_qbytes);
+	return;
 }
 
 void ipc_send(ipc_params_t params, void * message, int size){
 
+	struct msg new_msg;
+	
+	new_msg.mtype = params->unique_mq_id;
+	memcpy(new_msg.info, message, size);
 		
 	if (!params->unique_mq_id)
 	{
 		perror("Error MessageQueue not set \n");
 		exit(1);
 	}
-	int msg = msgsnd(params->unique_mq_id,message,size,0); //O IPC_NOWAIT , Y EL PROCESO NO SE BLOQUEA SI TIENE QUE ESPERAR
+	int msg = msgsnd(params->unique_mq_id, &new_msg, size + sizeof(long), 0); //O IPC_NOWAIT , Y EL PROCESO NO SE BLOQUEA SI TIENE QUE ESPERAR
 	
-	printf("Enviado el mensaje %s \n", (char*) message);
 	if (msg) 
-		printf("Code: %d \n",msg);
+		printf("Code: %d %d\n",msg, errno);
 }
 
 int ipc_receive(ipc_params_t params, void * buffer, int size){
 	
-	int mleng;
-	char* msg = malloc(1000);
-
-
-        printf("Leyendo desde Queue ID: %d\n", params->unique_mq_id);
-	if ((mleng = msgrcv(params->unique_mq_id,msg,size,0, MSG_NOERROR)) == -1)
-	{		perror("Message Recieve Error");
-			exit(1);
-	}
-        msg = realloc(msg,mleng);
-	msg[mleng] = 0;
-	printf("Recibido:   %s\n",msg);
-
+	struct msg new_msg;
+	int rec;
 	
-	return 1;
+	new_msg.mtype = params->unique_mq_id;
+	
+	rec = msgrcv(params->unique_mq_id, buffer, size, 0, MSG_NOERROR);	
+	
+	memcpy(buffer, new_msg.info, size);
+	
+	return rec;
+}
+
+void ipc_close(ipc_params_t params){
 	
 }
