@@ -9,16 +9,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "../structs.h"
-#include "ipcs.h"
 
+#include "../../include/structs.h"
+#include "../../include/utils/parser.h"
+#include "../../include/defs.h"
+#include "../../include/data_structures/graph.h"
+#include "../../include/data_structures/stack.h"
+#include "../../include/ipcs/ipcs.h"
 
-#include "../parser.h"
-#include "../defs.h"
-#include "../Data_Structures/graph.h"
-#include "../Data_Structures/stack.h"
-
-
+void server_listen(void);
 
 
 int main ()
@@ -27,9 +26,12 @@ int main ()
 	 char read_string[100];
 	 int i = 0;
 	 ipc_params_t server_params = calloc(1, sizeof(struct ipc_params));
+
+ 	 printf("\n\n");
 	 printf("Sockets StandAlone - Program \n\n");
 	 ipc_create(server_params);
 	
+	 //server_listen();
 	 return 0;
 }
 
@@ -41,16 +43,20 @@ void ipc_create(ipc_params_t params){
 
 	//int sockfd;
 	int newsockfd;
-	int len;
+	unsigned int len;
+	int listenv;
+
 	struct sockaddr_in server = {AF_INET,7000,INADDR_ANY}; //INTERNET USE CON AF_INET
-	struct sockaddr_un local;  //LOCAL USE CON AF_LINUX
+	struct sockaddr_un local, remote;  //LOCAL USE CON AF_LINUX
 
 	/*struct sockaddr_un {
 	    unsigned short sun_family; 
 	    char sun_path[108];
 	}*/
 
-	
+ 	printf("Creating a socket server \n\n");	
+
+
 	if ((params->sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
 	{
 		perror("Socket Creation Failed \n");
@@ -63,6 +69,7 @@ void ipc_create(ipc_params_t params){
 	strcpy(local.sun_path, "/tmp");
 	unlink(local.sun_path);
 	len = strlen(local.sun_path) + sizeof(local.sun_family);
+	 printf("Params SOCK FD: %d \n",params->sockfd);
 	if((bind(params->sockfd, (struct sockaddr *)&local, len) == -1))
 	{
 		
@@ -80,20 +87,29 @@ void ipc_create(ipc_params_t params){
 		exit(1);
 	}*/
 
-
-	if((listen(params->sockfd,5)) == -1)
+	listenv = listen(params->sockfd,5);
+	 printf("Listen value: %d \n",listenv);
+	if( listenv == -1)
 	{
 	 	perror("Listen call Failed \n");
 		exit(1);
 	}
+	 len = sizeof(remote);
 	while(1)
-	{
-		if((newsockfd = accept(params->sockfd, NULL, NULL)) == -1)
+{	
+	newsockfd = accept(params->sockfd, (struct sockaddr *)&remote, &len);
+	printf("New socket File Descriptor: %d \n\n",newsockfd);
+	if(newsockfd == -1)
 		{
+			
+			
 		 	perror("Accept Connection call Failed \n");
-			continue;
+			//continue;
 		}
-	}
+		printf("New socket File Descriptor: %d \n\n",newsockfd);
+		sleep(1);
+}
+	
 
 
 }
@@ -185,3 +201,54 @@ void write_text (int socket_fd, const char* text)
 	return;
 }
 
+
+void server_listen(void)
+{
+    unsigned int s, s2, len;
+    struct sockaddr_un local, remote;
+    char code[1000];
+	int deleteme = 0;
+    //env_t *ans;
+
+    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        perror("unable to create socket");
+    }
+    printf("%d",s);
+    local.sun_family = AF_UNIX;
+    strcpy(local.sun_path, "../tmp/socket");
+    unlink(local.sun_path);
+
+    len = sizeof(struct sockaddr_un);
+
+     deleteme =  bind(s, (struct sockaddr *)&local, (socklen_t) len);
+     printf("%d",deleteme);
+     deleteme = listen(s, 5);
+     printf("%d",deleteme);
+
+    while (1) {
+        len = sizeof(remote);
+        if ((s2 = accept(s, (struct sockaddr *)&remote, &len)) == -1) {
+            error("unable to accept socket connection");
+        }
+
+        switch (fork()) {
+            case -1:
+                error("unable to fork process");
+                break;
+            case 0:
+             //   ans = env_init();
+                while ((len = recv(s2, code, sizeof(code), 0)) > 0) {
+                  //  env_run(ans, code);
+                   // send(s2, ans, sizeof(*ans), 0);
+                }
+               // free(ans);
+
+                close(s2);
+                break;
+            default:
+                break;
+        }
+    }
+
+    wait(NULL);
+}
