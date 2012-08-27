@@ -12,10 +12,24 @@
 #include "../../include/data_structures/stack.h"
 #include "../../include/ipcs/ipcs.h"
 
-struct msg{
-	long mtype;
-	char info[MAX_IPC_SIZE];
-};
+typedef struct{
+	long mtype_st;
+	struct status info_st;
+} status_msg;
+
+typedef struct{
+	long mtype_cl;
+	struct client_header info_cl;
+} client_msg;
+
+typedef struct{
+	long mtype_pr;
+	char info_pr[MAX_PROGRAM_LENGTH];
+} string_msg;
+
+status_msg new_msg_st;
+client_msg new_msg_cl;
+string_msg new_msg_pr;
 
 void
 fatal(char *s)
@@ -23,48 +37,6 @@ fatal(char *s)
 	perror(s);
 	exit(1);
 }
-
-/*
-int main()
-{
-
-
- char read_string[100];
- int i = 0;
- ipc_params_t server_params = calloc(1, sizeof(struct ipc_params));
- printf("Message Queue StandAlone - Program \n\n");
- ipc_create_msgqueue(server_params);
- char* msg = "Luko Auriku";
- char* msg2 = "Luko Auriku II";
- char* msg3 = "Luko Auriku III";
- char* msg4 = "Luko Auriku IV";
- ipc_send(server_params,msg,strlen(msg)*sizeof(char));
- ipc_send(server_params,msg2,strlen(msg2)*sizeof(char)); 
- ipc_send(server_params,msg3,strlen(msg3)*sizeof(char));
- ipc_send(server_params,msg4,strlen(msg4)*sizeof(char));
- ipc_open(server_params, 0);
-	
-     while(1){
-		 if(ipc_receive(server_params, read_string, 100) > 0){
-			printf("%s \n", read_string);
-		   }
-		 else
-			printf("NO\n", read_string);
-		 	sleep(1);
-			
-					
-				
-			
-		  }
- return 0;
-}*/
-
-/*
-struct q_msg{
-	
- long mtype;
- char mtext[200];
-};*/
 
 void ipc_create(ipc_params_t params){	
 		/*printf("Conectado a la única Message Queue ID: %d\n", params->unique_mq_id);*/
@@ -74,48 +46,95 @@ void ipc_open(ipc_params_t params, int action){
 	
 	//IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR
 	
-	struct msqid_ds sets;
-	sets.msg_qbytes = 32768l;
+	//struct msqid_ds sets;
 	
-	if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) ==-1)
+	if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) == -1)
 		perror("Error in MessageQueue Allocation");  //VER PERMISOS
-	else			
-	 printf("Message Queue alocada en %d \n", params->unique_mq_id);
-	msgctl(params->unique_mq_id, IPC_SET, &sets);
-	msgctl(params->unique_mq_id, IPC_STAT, &sets);
-	printf("Tamanio de la queue: %ul\n", (unsigned long)sets.msg_qbytes);
-	return;
 }
 
-void ipc_send(ipc_params_t params, void * message, int size){
-
-	struct msg new_msg;
+void ipc_send(ipc_params_t params, void * message, int size)
+{
+	void * new_msg;
+	int msg, msg_size, i = 0;
+	char * aux_str;
 	
-	new_msg.mtype = params->unique_mq_id;
-	memcpy(new_msg.info, message, size);
+	switch (params->msg_type)
+	{
+		case PRE_HEADER:
+			new_msg_cl.mtype_cl = params->unique_id;
+			new_msg_cl.info_cl.program_size = 
+							((client_header_t)message)->program_size;
+			new_msg_cl.info_cl.client_id = 
+							((client_header_t)message)->client_id;
+			new_msg = &new_msg_cl;
+			msg_size = sizeof(client_msg);
+			break;
+		case PROGRAM_STRING:
+			aux_str = message;
+			new_msg_pr.mtype_pr = params->unique_id;
+			while (aux_str[i] != 0) {
+				new_msg_pr.info_pr[i] = aux_str[i];
+				i++;
+			}
+			new_msg_pr.info_pr[i] = 0;
+			new_msg = &new_msg_pr;
+			msg_size = sizeof(string_msg);
+			break;
+		case PROGRAM_STATUS:
+			new_msg_st.mtype_st = params->unique_id;
+			new_msg_st.info_st = *((status_t)message);
+			new_msg_st.info_st.g_header = ((status_t)message)->g_header;
+			new_msg = &new_msg_st;
+			msg_size = sizeof(status_msg);
+			break;
+		default:
+			return;
+	}
 		
 	if (!params->unique_mq_id)
 	{
-		perror("Error MessageQueue not set \n");
+		perror("Error MsgQueue not set\n");
 		exit(1);
 	}
-	int msg = msgsnd(params->unique_mq_id, &new_msg, size + sizeof(long), 0); //O IPC_NOWAIT , Y EL PROCESO NO SE BLOQUEA SI TIENE QUE ESPERAR
 	
-	if (msg) 
+	msg = msgsnd(params->unique_mq_id, new_msg, 
+				msg_size, 0);
+	
+	if (msg)
 		printf("Code: %d %d\n",msg, errno);
 }
 
 int ipc_receive(ipc_params_t params, void * buffer, int size){
 	
-	struct msg new_msg;
-	int rec;
+	int rec;	
+	void * info;
+
+	switch (params->msg_type)
+	{
+		case PRE_HEADER:
+			new_msg_cl.mtype_cl = 1;
+			rec = msgrcv(params->unique_mq_id, &new_msg_cl, 
+						sizeof(client_msg), 0, MSG_NOERROR);
+			info = &new_msg_cl.info_cl;
+			break;
+		case PROGRAM_STRING:
+			new_msg_pr.mtype_pr = 1;
+			rec = msgrcv(params->unique_mq_id, &new_msg_pr, 
+						sizeof(string_msg), 0, MSG_NOERROR);
+			info = &new_msg_pr.info_pr;
+			break;
+		case PROGRAM_STATUS:
+			new_msg_st.mtype_st = 1;
+			rec = msgrcv(params->unique_mq_id, &new_msg_st, 
+						sizeof(status_msg), 0, MSG_NOERROR);
+			info = &new_msg_st.info_st;
+			break;
+		default:
+			return 0;
+	}
 	
-	new_msg.mtype = params->unique_mq_id;
-	
-	rec = msgrcv(params->unique_mq_id, buffer, size, 0, MSG_NOERROR);	
-	
-	memcpy(buffer, new_msg.info, size);
-	
+	memcpy(buffer, info, size);
+
 	return rec;
 }
 

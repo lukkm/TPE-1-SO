@@ -7,6 +7,10 @@
 #define BIN_LENGTH 4
 #define TMP_LENGTH 5
 
+#define PRE_HEADER 6
+#define PROGRAM_STRING 7
+#define PROGRAM_STATUS 8
+
 #define FALSE 0
 #define TRUE 1
 

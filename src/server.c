@@ -59,15 +59,18 @@ main(void)
 	
 	while(1)
 	{
+		server_params->msg_type = PRE_HEADER;
 		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0)
 		{
-			
+			//printf("llega piola, %d %d\n", header->program_size, header->client_id);
 			read_string = calloc(1, header->program_size);
+			
+			server_params->msg_type = PROGRAM_STRING;
 			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
 				sleep(1);
 				
-			printf("Recibi programa del cliente: %d, programa: %s\n", header->client_id, read_string);
+			//printf("Recibi programa del cliente: %d, programa: %s\n", header->client_id, read_string);
 			
 			c_stack = parse_file(read_string);
 
@@ -137,7 +140,7 @@ void init(){
 				exit(1);
 				break;
 		}
-		printf("Conectando a: %s mediante %d\n", to_exec, (*(process_list[i]))->params->unique_id);
+		//printf("Conectando a: %s mediante %d\n", to_exec, (*(process_list[i]))->params->unique_id);
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		
 	}

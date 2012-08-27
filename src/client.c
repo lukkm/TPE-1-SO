@@ -30,7 +30,9 @@ int main(int argc, char ** argv){
 	header->client_id = getpid();
 
 	ipc_open(server_params, O_WRONLY);
+	server_params->msg_type = PRE_HEADER;
 	ipc_send(server_params, header, sizeof(struct client_header));	
+	server_params->msg_type = PROGRAM_STRING;
 	ipc_send(server_params, program_name, header->program_size);
 	ipc_close(server_params);
 	

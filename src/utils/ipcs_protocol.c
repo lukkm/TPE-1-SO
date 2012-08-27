@@ -40,6 +40,7 @@ void init_processes(){
 	strcpy(server_receive_params->file, ct_sv_rec_params);
 	server_receive_params->shm_segment_size = sizeof(struct status);
 	server_receive_params->unique_id = 30000;
+	server_receive_params->msg_type = PROGRAM_STATUS;
 	
 	server_params = calloc(1,sizeof(struct ipc_params));
 	server_params->file = calloc(1, strlen(ct_sv_params) + 1);
@@ -52,6 +53,7 @@ void init_processes(){
 	strcpy(client_params->file, ct_cl_params);
 	client_params->shm_segment_size = sizeof(struct status);
 	client_params->unique_id = 30002;
+	client_params->msg_type = PROGRAM_STATUS;
 
 	process_list[0] = &inc_process;
 	process_list[1] = &dec_process; 
@@ -108,5 +110,7 @@ void create_processes_information(){
 		(*(process_list[i]))->params->file = string_name;
 		(*(process_list[i]))->params->shm_segment_size = sizeof(struct status);
 		(*(process_list[i]))->params->unique_id = 40000+i;
+		(*(process_list[i]))->params->msg_type = PROGRAM_STATUS;
+		
 	}
 }

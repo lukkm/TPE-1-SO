@@ -76,6 +76,7 @@ typedef struct ipc_params{
 	/* MESSAGE QUEUE PARAMS */
 
 	int unique_mq_id;
+	int msg_type;
 
 	/*------------------*/
 
