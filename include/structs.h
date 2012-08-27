@@ -82,7 +82,11 @@ typedef struct ipc_params{
 	/*------------------*/
 	/* SOCKET PARAMS */
 
-	int socket_fd;
+	char* socket_name;
+	int sockfd;
+	int client_sockfd;
+
+	/*------------------*/
 
 	/*------------------*/
 
