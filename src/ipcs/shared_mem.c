@@ -20,7 +20,7 @@ fatal(char *s)
 	perror(s);
 	exit(1);
 }
-
+/*
 int main(void)
 {
 
@@ -43,19 +43,18 @@ int main(void)
 				
 			
 		  }
-}
+}*/
 
 void ipc_create(ipc_params_t params){	
 		
 	struct shmid_ds shmbuffer;
 	int segment_size = params->shm_segment_size;
-	const int shared_segment_size = 0x6400; //TODO VER TAMAÑO.
 	
-	params->segment_id = shmget(IPC_PRIVATE, shared_segment_size,
+	params->segment_id = shmget(params->unique_id, segment_size,
 	 IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 
-	printf("Segmento Nro %d alocado \n", params->segment_id);
-	printf("Tamaño %d bytes \n", shared_segment_size);
+	//printf("Segmento Nro %d alocado \n", params->segment_id);
+	//printf("Tamaño %d bytes \n", shared_segment_size);
 }
 
 void ipc_destroy(ipc_params_t params){	

@@ -77,7 +77,7 @@ void ipc_open(ipc_params_t params, int action){
 	struct msqid_ds sets;
 	sets.msg_qbytes = 32768l;
 	
-	if ((params->unique_mq_id = msgget((key_t)params->mq_id, IPC_CREAT | 0666)) ==-1)
+	if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) ==-1)
 		perror("Error in MessageQueue Allocation");  //VER PERMISOS
 	else			
 	 printf("Message Queue alocada en %d \n", params->unique_mq_id);

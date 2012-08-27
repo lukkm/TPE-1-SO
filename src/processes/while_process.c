@@ -51,7 +51,6 @@ int main(void)
 			}
 			shmdt(mem);
 		}
-		sleep(1);
 	}
 	
 	return 0;

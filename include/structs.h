@@ -52,6 +52,13 @@ typedef struct process_params{
 typedef struct ipc_params{
 
 	/*------------------*/
+	/* GENERAL PARAMS */
+
+	int unique_id;
+
+	/*------------------*/
+
+	/*------------------*/
 	/* FIFO PARAMS */
 	char * file;
 	int action;
@@ -68,7 +75,6 @@ typedef struct ipc_params{
 	/*------------------*/
 	/* MESSAGE QUEUE PARAMS */
 
-	int mq_id;
 	int unique_mq_id;
 
 	/*------------------*/
