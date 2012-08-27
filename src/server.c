@@ -137,7 +137,7 @@ void init(){
 				exit(1);
 				break;
 		}
-		printf("Conectando a: %s mediante %d\n", to_exec, (*(process_list[i]))->params->mq_id);
+		printf("Conectando a: %s mediante %d\n", to_exec, (*(process_list[i]))->params->unique_id);
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		
 	}
