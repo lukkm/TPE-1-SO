@@ -1,0 +1,1 @@
+gcc -g -o bin/soclient src/client.c src/ipcs/mqueue.c src/utils/ipcs_protocol.c
