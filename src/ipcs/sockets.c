@@ -2,110 +2,186 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <ctype.h>
+#include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "../../include/structs.h"
-#include "../../include/parser.h"
-#include "../../include/defs.h"
-#include "../../include/data_structures/graph.h"
-#include "../../include/data_ztructures/stack.h"
-#include "../../include/ipcs/ipcs.h"
+#include "../structs.h"
+#include "ipcs.h"
+
+
+#include "../parser.h"
+#include "../defs.h"
+#include "../Data_Structures/graph.h"
+#include "../Data_Structures/stack.h"
 
 
 
-int ipc_receive(ipc_params_t params, void * buffer, int size)
-{
 
- int length;
- char* text;
-
-/* First, read the length of the text message from the socket.
-read returns zero, the client closed the connection. */
- 
-if (read(params->socket_fd, &length, sizeof (length)) == 0)
-   {
-	printf("Connection closed \n");
-	return 0;
-   }
-	 
- /* Allocate a buffer */
-    text = (char*) malloc (length);
-  
- /* Read the text itself, and print it. */
-    read(params->socket_fd, text, length);
-    printf (“%s\n”, text);
-    memcpy(buffer,text,sizeof(char)*length+1);
-    free (text);
- 
-   return 1;
-
-}
-
-int main (int argc, char* const argv[])
+int main ()
 {
  
- const char* const socket_name = argv[1];
-
- 
-
-int client_sent_quit_message;
-
-
-/* Repeatedly accept connections, spinning off one server() to deal
-with each client. Continue until a client sends a “quit” message. */
-do {
-	struct sockaddr_un client_name;
-	socklen_t client_name_len;
-	int client_socket_fd;
-
-	/* Accept a connection. */
-	client_socket_fd = accept (socket_fd, &client_name, &client_name_len);
-	/* Handle the connection. */
-	client_sent_quit_message = ipc_receive(client_socket_fd);
-	/* Close our end of the connection. */
-	close (client_socket_fd);
-   }
-while (!client_sent_quit_message);
-
-ipc_close(
-unlink (socket_name);
-return 0;
+	 char read_string[100];
+	 int i = 0;
+	 ipc_params_t server_params = calloc(1, sizeof(struct ipc_params));
+	 printf("Sockets StandAlone - Program \n\n");
+	 ipc_create(server_params);
+	
+	 return 0;
 }
 
+
+//SERVER
 
 void ipc_create(ipc_params_t params){	
+
+
+	//int sockfd;
+	int newsockfd;
+	int len;
+	struct sockaddr_in server = {AF_INET,7000,INADDR_ANY}; //INTERNET USE CON AF_INET
+	struct sockaddr_un local;  //LOCAL USE CON AF_LINUX
+
+	/*struct sockaddr_un {
+	    unsigned short sun_family; 
+	    char sun_path[108];
+	}*/
+
+	
+	if ((params->sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+	{
+		perror("Socket Creation Failed \n");
+		exit(1);
+	}
+	
+	//BINDING AF_UNIX
+
+	local.sun_family = AF_UNIX;  /* local is declared before socket() ^ */
+	strcpy(local.sun_path, "/tmp");
+	unlink(local.sun_path);
+	len = strlen(local.sun_path) + sizeof(local.sun_family);
+	if((bind(params->sockfd, (struct sockaddr *)&local, len) == -1))
+	{
 		
-	/* Create the socket. */
-         params->socket_fd = socket (PF_LOCAL, SOCK_STREAM, 0);
-	 printf("Socket creado en puerto %d \n", params->socket_fd);
-	return;
+		perror("Bind call Failed \n");
+		exit(1);
+	}
+
+
+
+	//BINDING AF_INET
+	/*
+	if( (bind(params->sockfd,(struct sockaddr*)&server, sizeof(struct sockaddr_in))) == -1)
+	{
+	 	perror("Bind call Failed \n");
+		exit(1);
+	}*/
+
+
+	if((listen(params->sockfd,5)) == -1)
+	{
+	 	perror("Listen call Failed \n");
+		exit(1);
+	}
+	while(1)
+	{
+		if((newsockfd = accept(params->sockfd, NULL, NULL)) == -1)
+		{
+		 	perror("Accept Connection call Failed \n");
+			continue;
+		}
+	}
+
+
 }
 
+
+//CLIENT
 void ipc_open(ipc_params_t params, int action){
 	
-	struct sockaddr_un name;
-	/* Indicate that this is a server. */
-	name.sun_family = AF_LOCAL;
-	strcpy(name.sun_path, socket_name);
-	bind(socket_fd, &name, SUN_LEN (&name));
+
+        //  int client_sockfd;
+	  struct sockaddr_in server = {AF_INET,7000};
+          server.sin_addr.s_addr = inet_addr("206.45.10.2");
 	
-	/* Listen for connections. */
-        listen(socket_fd, 5);
-	printf("Escuchando del puerto %d \n", params->socket_fd);
-	return;
+	  if ((params->client_sockfd=socket(AF_INET, SOCK_STREAM,0)) == -1)
+	  {
+		perror("Client Socket Creation call Failed \n");	
+		exit(1);
+	  }
+
+	  if( connect(params->client_sockfd, (struct sockaddr*)&server, sizeof(struct sockaddr_in)) == -1)
+ 	  {
+		perror("Client Socket Connect call Failed \n");	
+		exit(1);
+	  }
+	
+	
 }
 
 void ipc_destroy(ipc_params_t params){
 	
-	/* Remove the socket file. */
-     close (params->socket_fd);
+
 
 }
 
 void ipc_close(ipc_params_t params){
+	
+	printf("Cerrando Cliente \n");
+	close(params->client_sockfd);
+}
 
+void ipc_closesrv(ipc_params_t params){
+	
+	printf("Cerrando Server \n");
+	close(params->sockfd);
+}
 
+void ipc_send(ipc_params_t params, void * message, int size){
+	
+
+	printf("Cliente- Enviado: %s\n", (char*) message);
+	send(params->client_sockfd, (char*) message, size,0);
+	return;
+
+	
+}
+
+void ipc_sendsrv(ipc_params_t params, void * message, int size){
+	
+
+	printf("Server- Enviado: %s\n", (char*) message);
+	send(params->sockfd, (char*) message, size,0);
+	return;
+
+	
+}
+
+int ipc_receive(ipc_params_t params, void * buffer, int size){
+	recv(params->client_sockfd, (char*) buffer, size,0);
+	printf("Cliente- Recibiendo: %s\n", (char*) buffer);
+
+}
+
+int ipc_receivesrv(ipc_params_t params, void * buffer, int size){
+	recv(params->sockfd, (char*) buffer, size,0);
+	printf("Server- Recibiendo: %s\n", (char*) buffer);
+
+}
+
+void write_text (int socket_fd, const char* text)
+{
+
+	/* Write the number of bytes in the string, including
+	NUL-termination. */
+	int length = strlen(text) + 1;
+	write(socket_fd, &length, sizeof (length));
+	
+	/* Write the string. */
+	write(socket_fd, text, length);
+	return;
 }
 
