@@ -8,10 +8,7 @@
 
 
 #include "../../include/structs.h"
-#include "../../include/parser.h"
 #include "../../include/defs.h"
-#include "../../include/data_structures/graph.h"
-#include "../../include/data_ztructures/stack.h"
 #include "../../include/ipcs/ipcs.h"
 
 void
@@ -50,11 +47,11 @@ void ipc_create(ipc_params_t params){
 	struct shmid_ds shmbuffer;
 	int segment_size = params->shm_segment_size;
 	
-	params->segment_id = shmget(params->unique_id, segment_size,
+	params->segment_id = shmget(params->unique_id, segment_size + sizeof(int),
 	 IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 
-	//printf("Segmento Nro %d alocado \n", params->segment_id);
-	//printf("Tamaño %d bytes \n", shared_segment_size);
+	printf("Segmento Nro %d alocado \n", params->segment_id);
+	printf("Tamaño %d bytes \n", segment_size);
 }
 
 void ipc_destroy(ipc_params_t params){	
@@ -76,18 +73,19 @@ void ipc_close(ipc_params_t params){
 
 void ipc_send(ipc_params_t params, void * message, int size){
 
-	printf("Enviado:  %s" , message);
-	
-	sprintf(params->shared_memory_address, message);
-	printf("\n");
+	//printf("Enviado:  %s" , message);
+	sprintf(params->shared_memory_address, 1);
+	sprintf(params->shared_memory_address + 1, message);
+	//printf("\n");
 	
 }
 
 
 int ipc_receive(ipc_params_t params, void * buffer, int size){
-
+	if ((int)(*(params->shared_memory_address)) == 0)
+		return 0; 
 	memcpy(buffer,params->shared_memory_address,size);
-	printf("Recibido:   %s\n", params->shared_memory_address);
-	return 1;
+	return size;
+	//printf("Recibido:   %s\n", params->shared_memory_address);
 	//return read(params->fd, buffer, size);
 }
