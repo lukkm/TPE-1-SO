@@ -1,0 +1,1 @@
+gcc -g -o bin/soclient src/client.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c
