@@ -38,7 +38,7 @@ int main(int argc, char ** argv){
 	
 	ipc_create(client_params);
 	ipc_open(client_params, O_RDONLY);
-	ipc_receive(client_params, &cl_program, sizeof(struct status));
+	while (!ipc_receive(client_params, &cl_program, sizeof(struct status)))
 	ipc_close(client_params);
 	
 	for (i = 0; i < MEM_SIZE; i++){

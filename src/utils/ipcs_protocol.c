@@ -52,7 +52,7 @@ void init_processes(){
 	client_params->file = calloc(1, strlen(ct_cl_params) + 1);
 	strcpy(client_params->file, ct_cl_params);
 	client_params->shm_segment_size = sizeof(struct status);
-	client_params->unique_id = 30002;
+	client_params->unique_id = 30002; /*Despues cambia por su pid */
 	client_params->msg_type = PROGRAM_STATUS;
 
 	process_list[0] = &inc_process;
@@ -109,7 +109,7 @@ void create_processes_information(){
 		string_name[string_length - 1] = 0;
 		(*(process_list[i]))->params->file = string_name;
 		(*(process_list[i]))->params->shm_segment_size = sizeof(struct status);
-		(*(process_list[i]))->params->unique_id = 40000+i;
+		(*(process_list[i]))->params->unique_id = getpid();
 		(*(process_list[i]))->params->msg_type = PROGRAM_STATUS;
 		
 	}

@@ -8,7 +8,8 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <errno.h>
-
+#include <semaphore.h>
+#include <pthread.h>
 
 #include "../include/structs.h"
 #include "../include/utils/parser.h"
@@ -33,6 +34,8 @@ extern ipc_params_t client_params;
 
 extern process_t * process_list[CANT_INSTRUCTIONS];
 extern char * process_name_list[CANT_INSTRUCTIONS];
+
+sem_t sem;
 
 void init(void);
 void init_processes(void);
@@ -116,10 +119,10 @@ void init(){
 	
 	ipc_create(server_receive_params);
 	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
+
+	sem_init(&sem,0,0);
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
-		
-		ipc_create((*process_list[i])->params);
 		
 		switch(pid = fork()){
 			case -1:
@@ -140,6 +143,9 @@ void init(){
 				exit(1);
 				break;
 		}
+		printf("Conectando al unique_id: %d\n", (*process_list[i])->params->unique_id);
+		(*(process_list[i]))->params->unique_id = pid;
+		ipc_create((*process_list[i])->params);
 		//printf("Conectando a: %s mediante %d\n", to_exec, (*(process_list[i]))->params->unique_id);
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		
