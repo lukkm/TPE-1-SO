@@ -39,7 +39,8 @@ fatal(char *s)
 }
 
 void ipc_create(ipc_params_t params){	
-		/*printf("Conectado a la única Message Queue ID: %d\n", params->unique_mq_id);*/
+		if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) == -1)
+			perror("Error in MessageQueue Allocation");  //VER PERMISOS
 }
 
 void ipc_open(ipc_params_t params, int action){

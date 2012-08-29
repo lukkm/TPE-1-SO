@@ -112,6 +112,7 @@ void * run_program(void * program_stat)
 						&memkey, &client_program.g_header);
 		client_program.cursor = 0;
 		client_program.flag = FALSE;
+		
 		for(i = 0; i < MEM_SIZE; i++){
 			client_program.mem[i] = 0;
 		}

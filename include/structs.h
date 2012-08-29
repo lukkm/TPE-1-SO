@@ -11,7 +11,6 @@ typedef struct status{
 	int mem[1000], 
 		cursor, 
 		flag;
-		//sem;	
 	struct shared_graph_header g_header;
 } status;
 
