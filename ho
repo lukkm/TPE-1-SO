@@ -1,0 +1,4 @@
+WHILE(1,CZ)
+Inc(5)
+MR(1)
+ENDWHILE(1)
