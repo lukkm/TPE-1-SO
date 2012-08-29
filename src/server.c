@@ -16,6 +16,7 @@
 #include "../include/defs.h"
 #include "../include/data_structures/graph.h"
 #include "../include/data_structures/stack.h"
+#include "../include/utils/process_utils.h"
 #include "../include/ipcs/ipcs.h"
 
 extern process_t inc_process;
@@ -30,7 +31,6 @@ extern process_t endwhile_process;
 
 extern ipc_params_t server_receive_params;
 extern ipc_params_t server_params;
-extern ipc_params_t client_params;
 
 extern process_t * process_list[CANT_INSTRUCTIONS];
 extern char * process_name_list[CANT_INSTRUCTIONS];
@@ -44,6 +44,12 @@ graph_t create_sh_graph(graph_t, int, int*, shared_graph_header_t);
 int get_graph_size(graph_t);
 void * run_program(void * program_name);
 
+struct thread_status{
+	char * file;
+	int client_id;
+};
+typedef struct thread_status * thread_status_t;
+
 int
 main(void) 
 {
@@ -51,6 +57,7 @@ main(void)
 	int aux_size;
 	
 	pthread_t thread_id;
+	thread_status_t thread_info;
 	
 	init_processes();
 	init();
@@ -72,7 +79,10 @@ main(void)
 				sleep(1);
 			printf("Recibi programa del cliente: %d, programa: %s\n", 
 										header->client_id, read_string);
-			pthread_create(&thread_id, NULL, &run_program, read_string);			
+			thread_info = calloc(1, sizeof(struct thread_status));
+			thread_info->file = read_string;
+			thread_info->client_id = header->client_id;
+			pthread_create(&thread_id, NULL, &run_program, thread_info);			
 		}
 	}
 		
@@ -80,15 +90,19 @@ main(void)
 	return 0;
 }
 
-void * run_program(void * program_name)
+void * run_program(void * program_stat)
 {
+	ipc_params_t client_params;
+	
 	stack_t c_stack;
 	graph_t c_graph;
 	int memkey, i;
 	status client_program;
 	process_t process_type;
 	
-	c_stack = parse_file((char*)program_name);
+	thread_status_t thread_info = (thread_status_t)program_stat;
+	
+	c_stack = parse_file((char*)thread_info->file);
 
 	c_graph = build_graph(c_stack);
 
@@ -110,6 +124,8 @@ void * run_program(void * program_name)
 	while(!ipc_receive(server_receive_params, &client_program, 
 												sizeof(struct status)))
 		sleep(1);
+	
+	client_params = get_params_from_pid(thread_info->client_id, PROGRAM_STATUS, sizeof(struct status));
 	
 	ipc_open(client_params, O_WRONLY);
 	ipc_send(client_params, &client_program, sizeof(struct status));

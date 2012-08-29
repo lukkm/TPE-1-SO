@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <stdio.h>
+#include <string.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -81,4 +82,33 @@ void run_process(status_t c_program, void * (* execute_func) (void *))
 	thread_args = pre_execute(c_program, mem);
 	pthread_mutex_unlock(&mutex);
 	pthread_create(&thread_id, NULL, execute_func, thread_args);	
+}
+
+ipc_params_t get_params_from_pid(int pid, int type, int shm_size){
+	
+	ipc_params_t params = calloc(1, sizeof(struct ipc_params));
+	int aux = pid, cont = 0;
+	char * ct_tmp = "/tmp/";
+	
+	params->unique_id = pid;
+	params->msg_type = type;
+	params->shm_segment_size = shm_size;
+	
+	while(aux > 0){
+		aux /= 10;
+		cont++;
+	}
+	cont+=5;
+	
+	params->file = calloc(cont+TMP_LENGTH+1, sizeof(char));
+	strcpy(params->file, ct_tmp);
+	
+	params->file[cont--] = 0;
+	
+	while(pid > 0){
+		params->file[cont--] = pid % 10;
+		pid /= 10;
+	}
+	
+	return params;
 }

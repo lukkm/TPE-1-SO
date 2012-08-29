@@ -22,7 +22,6 @@ process_t endwhile_process;
 
 ipc_params_t server_receive_params;
 ipc_params_t server_params;
-ipc_params_t client_params;
 
 process_t * process_list[CANT_INSTRUCTIONS];
 char * process_name_list[CANT_INSTRUCTIONS];
@@ -33,7 +32,6 @@ void init_processes(){
 	
 	char * ct_sv_rec_params = "/tmp/sv_receive";
 	char * ct_sv_params = "/tmp/server";
-	char * ct_cl_params = "/tmp/client";
 	
 	server_receive_params = calloc(1, sizeof(struct ipc_params));
 	server_receive_params->file = calloc(1, strlen(ct_sv_rec_params) + 1);
@@ -47,13 +45,6 @@ void init_processes(){
 	strcpy(server_params->file, ct_sv_params);
 	server_params->shm_segment_size = sizeof(struct client_header) + MAX_PROGRAM_LENGTH;
 	server_params->unique_id = 30001;
-
-	client_params = calloc(1,sizeof(struct ipc_params));
-	client_params->file = calloc(1, strlen(ct_cl_params) + 1);
-	strcpy(client_params->file, ct_cl_params);
-	client_params->shm_segment_size = sizeof(struct status);
-	client_params->unique_id = 30002; /*Despues cambia por su pid */
-	client_params->msg_type = PROGRAM_STATUS;
 
 	process_list[0] = &inc_process;
 	process_list[1] = &dec_process; 

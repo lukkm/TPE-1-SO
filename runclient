@@ -1,1 +1,1 @@
-gcc -g -o bin/soclient src/client.c src/ipcs/fifo.c src/utils/ipcs_protocol.c
+gcc -g -o bin/soclient src/client.c src/ipcs/fifo.c src/utils/process_utils.c src/utils/ipcs_protocol.c -lpthread
