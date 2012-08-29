@@ -30,15 +30,18 @@ int main(int argc, char ** argv){
 	header->client_id = getpid();
 
 	ipc_open(server_params, O_WRONLY);
+	
 	server_params->msg_type = PRE_HEADER;
-	ipc_send(server_params, header, sizeof(struct client_header));	
+	ipc_send(server_params, header, sizeof(struct client_header));
+	
 	server_params->msg_type = PROGRAM_STRING;
 	ipc_send(server_params, program_name, header->program_size);
+	
 	ipc_close(server_params);
 	
 	ipc_create(client_params);
 	ipc_open(client_params, O_RDONLY);
-	while (!ipc_receive(client_params, &cl_program, sizeof(struct status)))
+	while (!ipc_receive(client_params, &cl_program, sizeof(struct status)));
 	ipc_close(client_params);
 	
 	for (i = 0; i < MEM_SIZE; i++){

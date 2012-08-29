@@ -38,16 +38,11 @@ typedef struct graph_node{
 	int while_executed;
 } graph_node;
 
-typedef struct{
+typedef struct graph{
 	struct graph_node * first;
 	struct graph_node * current;
 /* Mas informacion que pueda tener */
 } graph;
-
-typedef struct process_params{
-	struct status * c_status;
-	int param;
-} process_params;
 
 typedef struct ipc_params{
 
@@ -99,13 +94,19 @@ typedef struct process{
 	int pid;
 } process;
 
+typedef struct process_params{
+	struct status * c_status;
+	int param;
+	struct graph * sh_graph;
+} process_params;
+
 typedef struct client_header{
 	int client_id;
 	int program_size;
 } client_header;
 
 
-typedef process_params * process_params_t;
+
 typedef status * status_t;
 typedef process * process_t;
 typedef instruction * instruction_t;
@@ -115,4 +116,5 @@ typedef graph_node * node_t;
 typedef graph * graph_t;
 typedef ipc_params * ipc_params_t;
 typedef shared_graph_header * shared_graph_header_t;
+typedef process_params * process_params_t;
 typedef client_header * client_header_t;

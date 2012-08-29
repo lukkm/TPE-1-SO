@@ -106,38 +106,42 @@ void ipc_send(ipc_params_t params, void * message, int size)
 
 int ipc_receive(ipc_params_t params, void * buffer, int size){
 	
-	int rec;	
+	int rec = 0;	
 	void * info;
 
 	switch (params->msg_type)
 	{
 		case PRE_HEADER:
-			new_msg_cl.mtype_cl = 1;
+			new_msg_cl.mtype_cl = params->unique_id;
 			rec = msgrcv(params->unique_mq_id, &new_msg_cl, 
 						sizeof(client_msg), 0, MSG_NOERROR);
 			info = &new_msg_cl.info_cl;
 			break;
 		case PROGRAM_STRING:
-			new_msg_pr.mtype_pr = 1;
+			new_msg_pr.mtype_pr = params->unique_id;
 			rec = msgrcv(params->unique_mq_id, &new_msg_pr, 
 						sizeof(string_msg), 0, MSG_NOERROR);
 			info = &new_msg_pr.info_pr;
 			break;
 		case PROGRAM_STATUS:
-			new_msg_st.mtype_st = 1;
+			new_msg_st.mtype_st = params->unique_id;
 			rec = msgrcv(params->unique_mq_id, &new_msg_st, 
 						sizeof(status_msg), 0, MSG_NOERROR);
 			info = &new_msg_st.info_st;
 			break;
 		default:
-			return 0;
+			rec = 0;
 	}
 	
-	memcpy(buffer, info, size);
+	if (rec)
+		memcpy(buffer, info, size);
 
 	return rec;
 }
 
-void ipc_close(ipc_params_t params){
-	
+void ipc_close(ipc_params_t params){ }
+
+void ipc_destroy(ipc_params_t params)
+{
+	msgctl(params->unique_mq_id, IPC_RMID, NULL);
 }

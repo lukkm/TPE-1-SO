@@ -42,69 +42,78 @@ void init_processes(void);
 void fatal(char *s);
 graph_t create_sh_graph(graph_t, int, int*, shared_graph_header_t);
 int get_graph_size(graph_t);
+void * run_program(void * program_name);
 
 int
 main(void) 
 {
-	stack_t c_stack;
-	graph_t c_graph;
-
 	char * read_string;
 	int aux_size;
-	int memkey, i;
-	process_t process_type;
-	status client_program;
+	
+	pthread_t thread_id;
 	
 	init_processes();
 	init();
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
 	
+	printf("Running server...\n");
+	
 	while(1)
 	{
 		server_params->msg_type = PRE_HEADER;
 		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0)
 		{
-			//printf("llega piola, %d %d\n", header->program_size, header->client_id);
 			read_string = calloc(1, header->program_size);
-			
+			printf("%d %d\n", header->client_id, header->program_size);
 			server_params->msg_type = PROGRAM_STRING;
 			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
 				sleep(1);
-				
-			//printf("Recibi programa del cliente: %d, programa: %s\n", header->client_id, read_string);
-			
-			c_stack = parse_file(read_string);
-
-			c_graph = build_graph(c_stack);
-
-			if (c_graph != NULL)
-			{
-				create_sh_graph(c_graph, get_graph_size(c_graph), 
-								&memkey, &client_program.g_header);
-				client_program.cursor = 0;
-				client_program.flag = FALSE;
-				for(i = 0; i < MEM_SIZE; i++){
-					client_program.mem[i] = 0;
-				}
-				process_type = c_graph->first->instruction_process->instruction_type;
-				client_program.mtype = process_type->params->unique_mq_id;
-				ipc_send(process_type->params, &client_program, sizeof(struct status));
-			}else{
-				printf("Entrada incorrecta\n");
-			}
+			printf("Recibi programa del cliente: %d, programa: %s\n", 
+										header->client_id, read_string);
+			pthread_create(&thread_id, NULL, &run_program, read_string);			
 		}
-		if (ipc_receive(server_receive_params, &client_program, sizeof(struct status))){
-			ipc_open(client_params, O_WRONLY);
-			ipc_send(client_params, &client_program, sizeof(struct status));
-			ipc_close(client_params);
-		}
-		sleep(1);
 	}
 		
 
 	return 0;
+}
+
+void * run_program(void * program_name)
+{
+	stack_t c_stack;
+	graph_t c_graph;
+	int memkey, i;
+	status client_program;
+	process_t process_type;
+	
+	c_stack = parse_file((char*)program_name);
+
+	c_graph = build_graph(c_stack);
+
+	if (c_graph != NULL)
+	{
+		create_sh_graph(c_graph, get_graph_size(c_graph), 
+						&memkey, &client_program.g_header);
+		client_program.cursor = 0;
+		client_program.flag = FALSE;
+		for(i = 0; i < MEM_SIZE; i++){
+			client_program.mem[i] = 0;
+		}
+		process_type = c_graph->first->instruction_process->instruction_type;
+		client_program.mtype = process_type->params->unique_mq_id;
+		ipc_send(process_type->params, &client_program, sizeof(struct status));
+	}else{
+		printf("Entrada incorrecta\n");
+	}
+	while(!ipc_receive(server_receive_params, &client_program, 
+												sizeof(struct status)))
+		sleep(1);
+	
+	ipc_open(client_params, O_WRONLY);
+	ipc_send(client_params, &client_program, sizeof(struct status));
+	ipc_close(client_params);
 }
 
 void init(){
@@ -114,13 +123,15 @@ void init(){
 	char * to_exec;
 	char * ct_bin = "bin/";
 	
+	ipc_destroy(server_params);
 	ipc_create(server_params);
 	ipc_open(server_params, O_RDONLY);
 	
+	ipc_destroy(server_receive_params);
 	ipc_create(server_receive_params);
 	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
 
-	sem_init(&sem,0,0);
+	//sem_init(&sem,0,0);
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
 		
@@ -143,10 +154,9 @@ void init(){
 				exit(1);
 				break;
 		}
-		printf("Conectando al unique_id: %d\n", (*process_list[i])->params->unique_id);
 		(*(process_list[i]))->params->unique_id = pid;
-		ipc_create((*process_list[i])->params);
-		//printf("Conectando a: %s mediante %d\n", to_exec, (*(process_list[i]))->params->unique_id);
+		ipc_destroy((*process_list[i])->params);
+		ipc_create((*process_list[i])->params);		
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		
 	}
