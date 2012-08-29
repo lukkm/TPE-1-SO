@@ -6,7 +6,6 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 
-
 #include "../../include/structs.h"
 #include "../../include/defs.h"
 #include "../../include/ipcs/ipcs.h"

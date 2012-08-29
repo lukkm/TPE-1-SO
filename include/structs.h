@@ -1,3 +1,5 @@
+#include <pthread.h>
+
 typedef struct shared_graph_header{
 	struct graph * mem_adress;	
 	int fd;
@@ -6,9 +8,10 @@ typedef struct shared_graph_header{
 
 typedef struct status{
 	long mtype;
-	int mem[1000];
-	int cursor;
-	int flag;
+	int mem[1000], 
+		cursor, 
+		flag;
+		//sem;	
 	struct shared_graph_header g_header;
 } status;
 
@@ -104,8 +107,6 @@ typedef struct client_header{
 	int client_id;
 	int program_size;
 } client_header;
-
-
 
 typedef status * status_t;
 typedef process * process_t;
