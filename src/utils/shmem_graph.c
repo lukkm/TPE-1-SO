@@ -44,7 +44,7 @@ void * copy_node(void * sh_graph, node_t cur_node, int * cursor)
 	node_t aux_cond;
 	node_t aux_while;
 	node_t aux_sh_while;
-	stack_t aux_stack = create_stack();
+	mstack_t aux_stack = create_stack();
 	int aux_size, start = *cursor;
 	int aux_type, flag = 0;
 	
@@ -158,7 +158,7 @@ node_t copy_graph(node_t c_node, void * sh_graph,
 {
 	int aux_size, aux_type, flag = 0;
 	node_t aux_sh_node, aux_c_node = c_node, sh_node;
-	stack_t aux_stack = create_stack();
+	mstack_t aux_stack = create_stack();
 	void * super_aux;
 
 	if (c_node == NULL)

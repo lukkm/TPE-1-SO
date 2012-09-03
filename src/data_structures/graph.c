@@ -6,15 +6,15 @@
 #include "../../include/data_structures/stack.h"
 #include "../../include/defs.h"
 
-int parse_string(char *, stack_t);
+int parse_string(char *, mstack_t);
 
-graph_t build_graph(stack_t instructions)
+graph_t build_graph(mstack_t instructions)
 {
     graph_t new_graph = (graph_t)calloc(1, sizeof(graph));
     graph_t expr_graph;
 
-    stack_t aux_node_stack = (stack_t)calloc(1, sizeof(stack));
-    stack_t expr_stack;
+    mstack_t aux_node_stack = (mstack_t)calloc(1, sizeof(stack));
+    mstack_t expr_stack;
 
     node_t new_node;
     node_t ending_graph_node;

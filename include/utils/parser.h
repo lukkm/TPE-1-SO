@@ -1,1 +1,1 @@
-stack_t parse_file(char *);
+mstack_t parse_file(char *);

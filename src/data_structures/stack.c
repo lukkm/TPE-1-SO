@@ -5,11 +5,11 @@
 #include "../../include/data_structures/stack.h"
 
 
-stack_t create_stack(){
-	return (stack_t)calloc(1, sizeof(stack));
+mstack_t create_stack(){
+	return (mstack_t)calloc(1, sizeof(stack));
 }
 
-int push(stack_t c_stack, void * info){
+int push(mstack_t c_stack, void * info){
 	if (c_stack == NULL)
 		return -1;
 
@@ -24,7 +24,7 @@ int push(stack_t c_stack, void * info){
 	(c_stack->size)++;
 }
 
-stack_node pop(stack_t c_stack){
+stack_node pop(mstack_t c_stack){
 	if (is_empty(c_stack))
 		return NULL;
 
@@ -34,7 +34,7 @@ stack_node pop(stack_t c_stack){
 	return ans;	
 }
 
-int is_empty(stack_t c_stack){
+int is_empty(mstack_t c_stack){
 	if (c_stack == NULL)
 		return TRUE;
 	return c_stack->size == 0;

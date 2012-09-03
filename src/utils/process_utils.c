@@ -42,16 +42,34 @@ void call_next_process(status c_status, ipc_params_t params){
 
 void take_next_step(process_params_t par)
 {
-	graph_t sh_graph = par->sh_graph;	
+	ipc_params next_process_params;
+
+	graph_t sh_graph = par->sh_graph;
+
 	//pthread_mutex_lock(&mutex);
 
+	//printf("File: %s, pointer: %p\n",new_file, sh_graph->current);	
+
 	if (sh_graph->current != NULL) {
-		call_next_process(*par->c_status, sh_graph->current->instruction_process->instruction_type->params);
+		char * file = sh_graph->current->instruction_process->
+					instruction_type->params->file;
+		int file_length = strlen(file);
+		char * new_file = calloc(file_length + 1, sizeof(char));
+	
+		memcpy(new_file, file, file_length);
+		memcpy(&next_process_params, sh_graph->current->
+			instruction_process->instruction_type->params, 
+						sizeof(struct ipc_params));
+	
+		next_process_params.file = new_file;
+		shmdt(sh_graph);
+		call_next_process(*par->c_status, &next_process_params);
 	}else{
 		call_next_process(*par->c_status, server_receive_params);
 		shmctl(par->c_status->g_header.fd, IPC_RMID, 0);
+		shmdt(sh_graph);
 	}
-	shmdt(sh_graph);
+	
 
 	//pthread_mutex_unlock(&mutex);
 }

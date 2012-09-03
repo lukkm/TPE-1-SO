@@ -110,7 +110,7 @@ typedef struct client_header{
 typedef status * status_t;
 typedef process * process_t;
 typedef instruction * instruction_t;
-typedef stack * stack_t;
+typedef stack * mstack_t;
 typedef node * stack_node;
 typedef graph_node * node_t;
 typedef graph * graph_t;

@@ -14,20 +14,20 @@
 #define CLEAN_LINE int i;for(i=0;i<MAX_INSTRUCTION_LENGTH;i++)line[i]=0;
 
 char * command_list[CANT_INSTRUCTIONS];
-int (* functions_list[CANT_INSTRUCTIONS]) (char *, stack_t, instruction_t);
+int (* functions_list[CANT_INSTRUCTIONS]) (char *, mstack_t, instruction_t);
 void set_lists(void);
 
-int parse_inc(char * instr, stack_t stack, instruction_t new_instr);
-int parse_dec(char * instr, stack_t stack, instruction_t new_instr);
-int parse_mr(char * instr, stack_t stack, instruction_t new_instr);
-int parse_ml(char * instr, stack_t stack, instruction_t new_instr);
-int parse_cz(char * instr, stack_t stack, instruction_t new_instr);
-int parse_if(char * instr, stack_t stack, instruction_t new_instr);
-int parse_endif(char * instr, stack_t stack, instruction_t new_instr);
-int parse_while(char * instr, stack_t stack, instruction_t new_instr);
-int parse_endwhile(char * instr, stack_t stack, instruction_t new_instr);
+int parse_inc(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_dec(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_mr(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_ml(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_cz(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_if(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_endif(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_while(char * instr, mstack_t stack, instruction_t new_instr);
+int parse_endwhile(char * instr, mstack_t stack, instruction_t new_instr);
 
-int parse_string(char * string, stack_t c_stack);
+int parse_string(char * string, mstack_t c_stack);
 
 extern process_t inc_process;
 extern process_t dec_process;
@@ -39,7 +39,7 @@ extern process_t endif_process;
 extern process_t while_process;
 extern process_t endwhile_process;
 
-stack_t parse_file(char * file_adress){
+mstack_t parse_file(char * file_adress){
 	FILE * file;
 	char c;
 	int i;
@@ -47,7 +47,7 @@ stack_t parse_file(char * file_adress){
 	file = fopen(file_adress, "r");
 	if (file == NULL)
 		return NULL;
-	stack_t stack = create_stack();
+	mstack_t stack = create_stack();
 	char * line = calloc(MAX_INSTRUCTION_LENGTH, sizeof(char));
 	while(!feof(file)){
 		i = 0;
@@ -84,7 +84,7 @@ void set_lists(){
 	functions_list[8] = &parse_endwhile;
 }
 
-int parse_string(char * string, stack_t c_stack){
+int parse_string(char * string, mstack_t c_stack){
 	int i = 0;
 	int count = 0, flag = 0;
 	char * aux_str;
@@ -121,7 +121,7 @@ int parse_string(char * string, stack_t c_stack){
 	return 0;
 }
 
-int select_instruction(char * instr, stack_t stack){
+int select_instruction(char * instr, mstack_t stack){
 	
 	int i, cmd_length;
 
@@ -140,7 +140,7 @@ int select_instruction(char * instr, stack_t stack){
 }
 
 
-int parse_inc(char * instr, stack_t stack, instruction_t new_instr){
+int parse_inc(char * instr, mstack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "Inc(%d)", &num)){
 		new_instr->instruction_type = inc_process;
@@ -152,7 +152,7 @@ int parse_inc(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_dec(char * instr, stack_t stack, instruction_t new_instr){
+int parse_dec(char * instr, mstack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "Dec(%d)", &num)){
 		new_instr->instruction_type = dec_process;
@@ -164,7 +164,7 @@ int parse_dec(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_mr(char * instr, stack_t stack, instruction_t new_instr){
+int parse_mr(char * instr, mstack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "MR(%d)", &num)){
 		new_instr->instruction_type = mr_process;
@@ -176,7 +176,7 @@ int parse_mr(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_ml(char * instr, stack_t stack, instruction_t new_instr){
+int parse_ml(char * instr, mstack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "ML(%d)", &num)){
 		new_instr->instruction_type = ml_process;
@@ -188,7 +188,7 @@ int parse_ml(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_cz(char * instr, stack_t stack, instruction_t new_instr){
+int parse_cz(char * instr, mstack_t stack, instruction_t new_instr){
 	int num;
 	if (!strcmp(instr, "CZ")){
 		new_instr->instruction_type = cz_process;
@@ -199,7 +199,7 @@ int parse_cz(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_if(char * instr, stack_t stack, instruction_t new_instr){
+int parse_if(char * instr, mstack_t stack, instruction_t new_instr){
 	int num, size, i = 0;
 	char * pos;
 	char * expr = calloc(1, MAX_INSTRUCTION_LENGTH);
@@ -220,7 +220,7 @@ int parse_if(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_endif(char * instr, stack_t stack, instruction_t new_instr){
+int parse_endif(char * instr, mstack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "ENDIF(%d)", &num)){
 		new_instr->instruction_type = endif_process;
@@ -232,7 +232,7 @@ int parse_endif(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_while(char * instr, stack_t stack, instruction_t new_instr){
+int parse_while(char * instr, mstack_t stack, instruction_t new_instr){
 	int num, size, i = 0;
 	char * pos;
 	char * expr = calloc(1, MAX_INSTRUCTION_LENGTH);
@@ -253,7 +253,7 @@ int parse_while(char * instr, stack_t stack, instruction_t new_instr){
 	}
 }
 
-int parse_endwhile(char * instr, stack_t stack, instruction_t new_instr){
+int parse_endwhile(char * instr, mstack_t stack, instruction_t new_instr){
 	int num;
 	if (sscanf(instr, "ENDWHILE(%d)", &num)){
 		new_instr->instruction_type = endwhile_process;

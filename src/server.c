@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "../include/structs.h"
 #include "../include/utils/parser.h"
@@ -43,6 +44,7 @@ void fatal(char *s);
 graph_t create_sh_graph(graph_t, int, int*, shared_graph_header_t);
 int get_graph_size(graph_t);
 void * run_program(void * program_name);
+void server_close();
 
 struct thread_status{
 	char * file;
@@ -61,6 +63,8 @@ main(void)
 	
 	init_processes();
 	init();
+
+	signal(SIGINT, server_close);
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
 	
@@ -83,7 +87,7 @@ main(void)
 			thread_info->file = read_string;
 			thread_info->client_id = header->client_id;
 			pthread_create(&thread_id, NULL, &run_program, thread_info);			
-		}
+		}	
 	}
 		
 
@@ -93,18 +97,14 @@ main(void)
 void * run_program(void * program_stat)
 {
 	ipc_params_t client_params;
-	
-	stack_t c_stack;
 	graph_t c_graph;
 	int memkey, i;
 	status client_program;
 	process_t process_type;
 	
 	thread_status_t thread_info = (thread_status_t)program_stat;
-	
-	c_stack = parse_file((char*)thread_info->file);
 
-	c_graph = build_graph(c_stack);
+	c_graph = build_graph(parse_file((char*)thread_info->file));
 
 	if (c_graph != NULL)
 	{
@@ -174,5 +174,23 @@ void init(){
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		
 	}
+
+}
+
+
+void server_close(){
+
+	int i;
+
+	printf("Closing server...\n");
+
+	for(i = 0; i < CANT_INSTRUCTIONS; i++)
+		ipc_close((*(process_list[i]))->params);
+
+	ipc_close(server_params);
+	ipc_close(server_receive_params);
+
+	printf("Server closed.\n");
+	exit(0);
 
 }

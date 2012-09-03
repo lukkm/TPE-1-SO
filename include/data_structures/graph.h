@@ -1,4 +1,4 @@
-graph_t build_graph(stack_t instructions);
+graph_t build_graph(mstack_t instructions);
 
 
 
