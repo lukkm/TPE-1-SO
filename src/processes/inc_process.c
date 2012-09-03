@@ -33,6 +33,7 @@ int main(void)
 
 void* execute_inc (void* structure_params)
 {
+	printf("hola exec\n");
 	process_params_t par = (process_params_t) structure_params;
 	par->c_status->mem[par->c_status->cursor] += par->param;
 	true_step(par);

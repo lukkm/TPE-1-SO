@@ -22,6 +22,8 @@ typedef struct {
 	void * (* v_execute_func) (void *);
 } call_params;
 
+typedef call_params * call_params_t;
+
 process_params_t pre_execute(status_t program, graph_t mem)
 {
   	process_params_t ret = (process_params_t)calloc(1, sizeof(struct process_params));
@@ -41,7 +43,7 @@ void call_next_process(status c_status, ipc_params_t params){
 void take_next_step(process_params_t par)
 {
 	graph_t sh_graph = par->sh_graph;	
-	pthread_mutex_lock(&mutex);
+	//pthread_mutex_lock(&mutex);
 
 	if (sh_graph->current != NULL) {
 		call_next_process(*par->c_status, sh_graph->current->instruction_process->instruction_type->params);
@@ -51,7 +53,7 @@ void take_next_step(process_params_t par)
 	}
 	shmdt(sh_graph);
 
-	pthread_mutex_unlock(&mutex);
+	//pthread_mutex_unlock(&mutex);
 }
 
 void false_step(process_params_t par)
@@ -74,15 +76,15 @@ void true_step(process_params_t par)
 
 void run_process(status_t c_status, void * (* execute_func) (void *))
 {	
-	call_params v_params;
+	call_params_t v_params = (call_params_t)calloc(1, sizeof(call_params));
 	
 	pthread_t thread_id;
 	
-	v_params.v_program = c_status;
-	v_params.v_execute_func = execute_func;
+	v_params->v_program = c_status;
+	v_params->v_execute_func = execute_func;
 	
-	//pthread_create(&thread_id, NULL, &call_function, &v_params);	
-	call_function(&v_params);
+	pthread_create(&thread_id, NULL, &call_function, v_params);	
+	//call_function(&v_params);
 }
 
 void * call_function(void * v_params)
@@ -92,20 +94,22 @@ void * call_function(void * v_params)
 	
 	graph_t mem;
 	
-	status_t c_status = ((call_params *)v_params)->v_program;
+	status_t c_status = ((call_params_t)v_params)->v_program;
 	void * (*exec_func) (void *) = 
-							((call_params *)v_params)->v_execute_func;
+							((call_params_t)v_params)->v_execute_func;
 	
-	pthread_mutex_lock(&mutex);
+	//pthread_mutex_lock(&mutex);
 
 	if ( (long)(mem = (graph_t)shmat(c_status->g_header.fd, 
 							c_status->g_header.mem_adress, 0)) == -1 )
 		fatal("shmat");
 
-	thread_args = pre_execute(c_status, mem);
-
-	pthread_mutex_unlock(&mutex);
-	pthread_create(&thread_id, NULL, exec_func, thread_args);
+	//thread_args = pre_execute(c_status, mem);
+	//pthread_mutex_unlock(&mutex);
+	
+	exec_func(pre_execute(c_status, mem));
+	
+	//pthread_create(&thread_id, NULL, exec_func, thread_args);
 	//func(thread_args);
 }
 
@@ -133,7 +137,7 @@ ipc_params_t get_params_from_pid(int pid, int type, int shm_size)
 	
 	while(pid > 0)
 	{
-		params->file[cont--] = pid % 10;
+		params->file[cont--] = pid % 10 + '0';
 		pid /= 10;
 	}
 	

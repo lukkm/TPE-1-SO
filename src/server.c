@@ -140,11 +140,9 @@ void init(){
 	char * to_exec;
 	char * ct_bin = "bin/";
 	
-	ipc_destroy(server_params);
 	ipc_create(server_params);
 	ipc_open(server_params, O_RDONLY);
 	
-	ipc_destroy(server_receive_params);
 	ipc_create(server_receive_params);
 	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
 
@@ -172,7 +170,6 @@ void init(){
 				break;
 		}
 		(*(process_list[i]))->params->unique_id = pid;
-		ipc_destroy((*process_list[i])->params);
 		ipc_create((*process_list[i])->params);		
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 		

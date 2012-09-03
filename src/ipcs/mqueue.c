@@ -38,9 +38,9 @@ fatal(char *s)
 	exit(1);
 }
 
-void ipc_create(ipc_params_t params){	
-		if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) == -1)
-			perror("Error in MessageQueue Allocation");  //VER PERMISOS
+void ipc_create(ipc_params_t params){
+	if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) == -1)
+		perror("Error in MessageQueue Allocation");
 }
 
 void ipc_open(ipc_params_t params, int action){
@@ -48,8 +48,7 @@ void ipc_open(ipc_params_t params, int action){
 	//IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR
 	
 	//struct msqid_ds sets;
-	
-	if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) == -1)
+	if ((params->unique_mq_id = msgget((key_t)params->unique_id, 0666)) == -1)
 		perror("Error in MessageQueue Allocation");  //VER PERMISOS
 }
 
@@ -90,12 +89,6 @@ void ipc_send(ipc_params_t params, void * message, int size)
 			break;
 		default:
 			return;
-	}
-		
-	if (!params->unique_mq_id)
-	{
-		perror("Error MsgQueue not set\n");
-		exit(1);
 	}
 	
 	msg = msgsnd(params->unique_mq_id, new_msg, 
