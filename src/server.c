@@ -185,10 +185,10 @@ void server_close(){
 	printf("Closing server...\n");
 
 	for(i = 0; i < CANT_INSTRUCTIONS; i++)
-		ipc_close((*(process_list[i]))->params);
+		ipc_destroy((*(process_list[i]))->params);
 
-	ipc_close(server_params);
-	ipc_close(server_receive_params);
+	ipc_destroy(server_params);
+	ipc_destroy(server_receive_params);
 
 	printf("Server closed.\n");
 	exit(0);

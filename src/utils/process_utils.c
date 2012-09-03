@@ -49,6 +49,7 @@ void take_next_step(process_params_t par)
 	//pthread_mutex_lock(&mutex);
 
 	//printf("File: %s, pointer: %p\n",new_file, sh_graph->current);	
+	
 
 	if (sh_graph->current != NULL) {
 		char * file = sh_graph->current->instruction_process->
@@ -64,10 +65,9 @@ void take_next_step(process_params_t par)
 		next_process_params.file = new_file;
 		shmdt(sh_graph);
 		call_next_process(*par->c_status, &next_process_params);
-	}else{
-		call_next_process(*par->c_status, server_receive_params);
+	}else{		
+		call_next_process(*par->c_status, server_receive_params);	
 		shmctl(par->c_status->g_header.fd, IPC_RMID, 0);
-		shmdt(sh_graph);
 	}
 	
 
