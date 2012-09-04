@@ -40,77 +40,59 @@ int main ()
 
 void ipc_create(ipc_params_t params){	
 
-
-	//int sockfd;
 	int newsockfd;
 	unsigned int len;
 	int listenv;
 
-	struct sockaddr_in server = {AF_INET,7000,INADDR_ANY}; //INTERNET USE CON AF_INET
-	struct sockaddr_un local, remote;  //LOCAL USE CON AF_LINUX
-
-	/*struct sockaddr_un {
-	    unsigned short sun_family; 
-	    char sun_path[108];
-	}*/
-
+	//struct sockaddr_in server = {AF_INET,7000,INADDR_ANY}; //INTERNET USE CON AF_INET
+	struct sockaddr_un server, client;  //LOCAL USE CON AF_LINUX
+	socklen_t client_name_len;
  	printf("Creating a socket server \n\n");	
 
+	//params->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
 	if ((params->sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
 	{
 		perror("Socket Creation Failed \n");
 		exit(1);
 	}
+		
 	
 	//BINDING AF_UNIX
 
-	local.sun_family = AF_UNIX;  /* local is declared before socket() ^ */
-	strcpy(local.sun_path, "/tmp");
-	unlink(local.sun_path);
-	len = strlen(local.sun_path) + sizeof(local.sun_family);
-	 printf("Params SOCK FD: %d \n",params->sockfd);
-	if((bind(params->sockfd, (struct sockaddr *)&local, len) == -1))
+	server.sun_family = AF_UNIX;  /* o AF_UNIX local is declared before socket() ^ */
+	strcpy(server.sun_path, "/tmp/sockets");
+	unlink(server.sun_path);
+	len = strlen(server.sun_path) + sizeof(server.sun_family);
+	printf("Params SOCK FD: %d \n", params->sockfd);
+	
+	if((bind(params->sockfd, (struct sockaddr *)&server,SUN_LEN(&server)) == -1))
 	{
-		
-		perror("Bind call Failed \n");
-		exit(1);
+	  perror("Bind call Failed \n");
+	  exit(1);
 	}
 
-
-
-	//BINDING AF_INET
-	/*
-	if( (bind(params->sockfd,(struct sockaddr*)&server, sizeof(struct sockaddr_in))) == -1)
-	{
-	 	perror("Bind call Failed \n");
-		exit(1);
-	}*/
-
 	listenv = listen(params->sockfd,5);
-	 printf("Listen value: %d \n",listenv);
-	if( listenv == -1)
+	printf("Listen value: %d \n",listenv);
+	
+	if(listenv == -1)
 	{
 	 	perror("Listen call Failed \n");
 		exit(1);
 	}
-	 len = sizeof(remote);
-	while(1)
-{	
-	newsockfd = accept(params->sockfd, (struct sockaddr *)&remote, &len);
-	printf("New socket File Descriptor: %d \n\n",newsockfd);
-	if(newsockfd == -1)
-		{
-			
-			
-		 	perror("Accept Connection call Failed \n");
-			//continue;
-		}
-		printf("New socket File Descriptor: %d \n\n",newsockfd);
-		sleep(1);
-}
-	
 
+	len = sizeof(client);
+        client_name_len = sizeof(struct sockaddr);
+	
+	newsockfd = accept(params->sockfd, (struct sockaddr *)&client, &client_name_len);
+	printf("New socket File Descriptor: %d \n\n", newsockfd);
+	if(newsockfd == -1)
+	   {
+	     perror("Accept Connection call Failed \n");
+	   }
+	printf("New socket File Descriptor: %d \n\n",newsockfd);
+	printf("finishhhhhhhh \n");
+	
 
 }
 
