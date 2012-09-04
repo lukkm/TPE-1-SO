@@ -105,3 +105,17 @@ void create_processes_information(){
 		
 	}
 }
+
+void free_processes() {
+	free(server_receive_params->file);
+	free(server_receive_params);
+	
+	free(server_params->file);
+	free(server_params);
+	
+	for (i = 0; i < CANT_INSTRUCTIONS; i++) {
+		free((*(process_list[i]))->params->file);
+		free((*(process_list[i]))->params);
+		free(*(process_list[i]));
+	}
+}

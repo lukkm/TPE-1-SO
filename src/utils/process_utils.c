@@ -11,6 +11,7 @@
 #include "../../include/defs.h"
 #include "../../include/ipcs/ipcs.h"
 #include "../../include/utils/process_utils.h"
+#include "../../include/utils/ipcs_protocol.h"
 
 ipc_params_t server_receive_params;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -96,13 +97,19 @@ void true_step(process_params_t par)
 void run_process(status_t c_status, void * (* execute_func) (void *))
 {	
 	call_params_t v_params = (call_params_t)calloc(1, sizeof(call_params));
+	int rc;
 	
 	pthread_t thread_id;
 	
 	v_params->v_program = c_status;
 	v_params->v_execute_func = execute_func;
 	
-	pthread_create(&thread_id, NULL, &call_function, v_params);	
+	rc = pthread_create(&thread_id, NULL, &call_function, v_params);	
+	if (rc) {
+		printf("%d\n", errno);
+	}
+	pthread_join(thread_id, NULL);
+	free(v_params);
 	//call_function(&v_params);
 }
 
@@ -128,7 +135,7 @@ void * call_function(void * v_params)
 	func_params = pre_execute(c_status, mem);
 	exec_func(func_params);
 	free(func_params);
-	pthread_exit(NULL);
+	pthread_exit(0);
 	//pthread_create(&thread_id, NULL, exec_func, thread_args);
 	//func(thread_args);
 }
@@ -162,4 +169,9 @@ ipc_params_t get_params_from_pid(int pid, int type, int shm_size)
 	}
 	
 	return params;
+}
+
+void end_process(){
+	free_processes();
+	exit(0);
 }

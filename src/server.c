@@ -19,6 +19,7 @@
 #include "../include/data_structures/stack.h"
 #include "../include/utils/process_utils.h"
 #include "../include/ipcs/ipcs.h"
+#include "../include/utils/ipcs_protocol.h"
 
 extern process_t inc_process;
 extern process_t dec_process;
@@ -39,7 +40,6 @@ extern char * process_name_list[CANT_INSTRUCTIONS];
 sem_t sem;
 
 void init(void);
-void init_processes(void);
 void fatal(char *s);
 graph_t create_sh_graph(graph_t, int, int*, shared_graph_header_t);
 int get_graph_size(graph_t);
@@ -88,7 +88,10 @@ main(void)
 			thread_info = calloc(1, sizeof(struct thread_status));
 			thread_info->file = read_string;
 			thread_info->client_id = header->client_id;
-			pthread_create(&thread_id, NULL, &run_program, thread_info);			
+			pthread_create(&thread_id, NULL, &run_program, thread_info);
+			pthread_join(thread_id, NULL);
+			free(read_string);
+			free(thread_info);
 		}	
 		if(ipc_receive(server_receive_params, &client_final, sizeof(struct status))){
 			
@@ -174,7 +177,6 @@ void init(){
 		(*(process_list[i]))->params->unique_id = pid;
 		ipc_create((*process_list[i])->params);		
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
-		
 	}
 
 }
@@ -191,8 +193,9 @@ void server_close(){
 
 	ipc_destroy(server_params);
 	ipc_destroy(server_receive_params);
+	
+	free_processes();
 
 	printf("Server closed.\n");
 	exit(0);
-
 }

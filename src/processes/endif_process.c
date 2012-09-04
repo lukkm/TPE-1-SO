@@ -5,14 +5,15 @@
 #include <errno.h>
 #include <sys/shm.h>
 #include <semaphore.h>
+#include <signal.h>
 
 #include "../../include/structs.h"
 #include "../../include/defs.h"
 #include "../../include/ipcs/ipcs.h"
 #include "../../include/utils/process_utils.h"
+#include "../../include/utils/ipcs_protocol.h"
 
 void* execute_endif (void*);
-void init_processes(void);
 
 process_t endif_process;
 
@@ -23,6 +24,9 @@ int main(void)
 	status c_program;
 	
 	init_processes();
+	
+	signal(SIGINT, end_process);
+	
 	ipc_open(endif_process->params, O_RDONLY);
 	
 	while(1)

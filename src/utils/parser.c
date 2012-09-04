@@ -59,6 +59,7 @@ mstack_t parse_file(char * file_adress){
 			return NULL;
 		CLEAN_LINE;
 	}
+	free(line);
 	return stack;
 }
 
@@ -123,13 +124,14 @@ int parse_string(char * string, mstack_t c_stack){
 
 int select_instruction(char * instr, mstack_t stack){
 	
-	int i, cmd_length;
+	int i, cmd_length, ret;
+	instruction_t new_instr;
 
 	if (instr[0] != 0){
 		for(i = 0; i < CANT_INSTRUCTIONS; i++){
 			cmd_length = strlen(command_list[i]);
 			if (!strncmp(instr,command_list[i], cmd_length)){
-				instruction_t new_instr = calloc(1, sizeof(struct instruction));
+				new_instr = calloc(1, sizeof(struct instruction));
 				if (new_instr == NULL)
 					return -1;
 				return functions_list[i](instr, stack, new_instr);
@@ -264,7 +266,3 @@ int parse_endwhile(char * instr, mstack_t stack, instruction_t new_instr){
 		return -1;
 	}
 }
-
-
-
-
