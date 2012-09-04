@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#define NOTSET -1
 
 #include "../../include/structs.h"
 #include "../../include/utils/parser.h"
@@ -19,6 +20,11 @@
 
 void server_listen(void);
 
+
+
+
+static int socketserv = NOTSET;
+static int socketclient = NOTSET;
 
 int main ()
 {
@@ -43,10 +49,16 @@ void ipc_create(ipc_params_t params){
 	int newsockfd;
 	unsigned int len;
 	int listenv;
+	struct sockaddr_un client; 
+	socklen_t client_name_len;
+        client_name_len = sizeof(struct sockaddr);
+	void* buffer;
+	
+
 
 	//struct sockaddr_in server = {AF_INET,7000,INADDR_ANY}; //INTERNET USE CON AF_INET
-	struct sockaddr_un server, client;  //LOCAL USE CON AF_LINUX
-	socklen_t client_name_len;
+	struct sockaddr_un server;  //LOCAL USE CON AF_LINUX
+
  	printf("Creating a socket server \n\n");	
 
 	//params->sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -66,45 +78,40 @@ void ipc_create(ipc_params_t params){
 	len = strlen(server.sun_path) + sizeof(server.sun_family);
 	printf("Params SOCK FD: %d \n", params->sockfd);
 	
-	if((bind(params->sockfd, (struct sockaddr *)&server,SUN_LEN(&server)) == -1))
+	if((bind(params->sockfd, (struct sockaddr *)&server, SUN_LEN(&server)) == -1))
 	{
 	  perror("Bind call Failed \n");
 	  exit(1);
 	}
 
 	listenv = listen(params->sockfd,5);
-	printf("Listen value: %d \n",listenv);
+	
 	
 	if(listenv == -1)
 	{
 	 	perror("Listen call Failed \n");
 		exit(1);
 	}
-
-	len = sizeof(client);
-        client_name_len = sizeof(struct sockaddr);
+        printf("Listening... %d \n",listenv);
 	
-	newsockfd = accept(params->sockfd, (struct sockaddr *)&client, &client_name_len);
-	printf("New socket File Descriptor: %d \n\n", newsockfd);
-	if(newsockfd == -1)
-	   {
-	     perror("Accept Connection call Failed \n");
-	   }
-	printf("New socket File Descriptor: %d \n\n",newsockfd);
-	printf("finishhhhhhhh \n");
+	printf("Waiting for connection... %d \n",listenv);
 	
-
+     
+	if ((params->client_sockfd = accept(params->sockfd, (struct sockaddr *)&client, &client_name_len)) == -1) {
+            error("Error accepting connection from socket %d", params->sockfd);
+      	 }
+	
+	ipc_receive(params, buffer, -1);
+		
+     
 }
 
 
 //CLIENT
 void ipc_open(ipc_params_t params, int action){
 	
-
-        //  int client_sockfd;
-	  struct sockaddr_in server = {AF_INET,7000};
-          server.sin_addr.s_addr = inet_addr("206.45.10.2");
 	
+
 	  if ((params->client_sockfd=socket(AF_INET, SOCK_STREAM,0)) == -1)
 	  {
 		perror("Client Socket Creation call Failed \n");	
@@ -120,11 +127,6 @@ void ipc_open(ipc_params_t params, int action){
 	
 }
 
-void ipc_destroy(ipc_params_t params){
-	
-
-
-}
 
 void ipc_close(ipc_params_t params){
 	
@@ -140,97 +142,51 @@ void ipc_closesrv(ipc_params_t params){
 
 void ipc_send(ipc_params_t params, void * message, int size){
 	
-
-	printf("Cliente- Enviado: %s\n", (char*) message);
-	send(params->client_sockfd, (char*) message, size,0);
-	return;
-
-	
-}
-
-void ipc_sendsrv(ipc_params_t params, void * message, int size){
-	
-
-	printf("Server- Enviado: %s\n", (char*) message);
-	send(params->sockfd, (char*) message, size,0);
-	return;
+	/* Create the socket. */
+	int socket_fd = socket(PF_LOCAL, SOCK_STREAM, 0);
+	/* Store the server’s name in the socket address. */
+	name.sun_family = AF_LOCAL;
+	strcpy(name.sun_path, socket_name);
+	/* Connect the socket. */
+	connect(socket_fd, &name, SUN_LEN (&name));
+	/* Write the text on the command line to the socket. */
+	write_text(socket_fd, message);
+	close (socket_fd);
+	return 0;
 
 	
-}
-
-int ipc_receive(ipc_params_t params, void * buffer, int size){
-	recv(params->client_sockfd, (char*) buffer, size,0);
-	printf("Cliente- Recibiendo: %s\n", (char*) buffer);
-
-}
-
-int ipc_receivesrv(ipc_params_t params, void * buffer, int size){
-	recv(params->sockfd, (char*) buffer, size,0);
-	printf("Server- Recibiendo: %s\n", (char*) buffer);
-
 }
 
 void write_text (int socket_fd, const char* text)
 {
-
 	/* Write the number of bytes in the string, including
 	NUL-termination. */
-	int length = strlen(text) + 1;
-	write(socket_fd, &length, sizeof (length));
-	
+	int length = strlen (text) + 1;
+	write(socket_fd, &length, sizeof(length));
 	/* Write the string. */
+	
 	write(socket_fd, text, length);
+	printf("Enviado: %s\n", (char*) text);	
 	return;
 }
 
 
-void server_listen(void)
-{
-    unsigned int s, s2, len;
-    struct sockaddr_un local, remote;
-    char code[1000];
-	int deleteme = 0;
-    //env_t *ans;
 
-    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-        perror("unable to create socket");
-    }
-    printf("%d",s);
-    local.sun_family = AF_UNIX;
-    strcpy(local.sun_path, "../tmp/socket");
-    unlink(local.sun_path);
-
-    len = sizeof(struct sockaddr_un);
-
-     deleteme =  bind(s, (struct sockaddr *)&local, (socklen_t) len);
-     printf("%d",deleteme);
-     deleteme = listen(s, 5);
-     printf("%d",deleteme);
-
-    while (1) {
-        len = sizeof(remote);
-        if ((s2 = accept(s, (struct sockaddr *)&remote, &len)) == -1) {
-            error("unable to accept socket connection");
-        }
-
-        switch (fork()) {
-            case -1:
-                error("unable to fork process");
-                break;
-            case 0:
-             //   ans = env_init();
-                while ((len = recv(s2, code, sizeof(code), 0)) > 0) {
-                  //  env_run(ans, code);
-                   // send(s2, ans, sizeof(*ans), 0);
-                }
-               // free(ans);
-
-                close(s2);
-                break;
-            default:
-                break;
-        }
-    }
-
-    wait(NULL);
+int ipc_receive(ipc_params_t params, void * buffer, int size){
+	int length;
+	char* text;
+	
+	if (read(params->client_sockfd, &length, sizeof (length)) == 0)
+		return 0;
+	/* Allocate a buffer to hold the text. */
+	text = (char*) malloc(length);
+	/* Read the text itself, and print it. */
+	read(client_socket, text, length);
+	
+	printf("Recibiendo: %s\n", (char*) text);
+	free(text);
 }
+
+
+
+
