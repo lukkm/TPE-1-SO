@@ -42,6 +42,9 @@ void call_next_process(status c_status, ipc_params_t params){
 
 void take_next_step(process_params_t par)
 {
+	char * new_file;
+	char * file;
+	int file_length;
 	ipc_params next_process_params;
 
 	graph_t sh_graph = par->sh_graph;
@@ -50,12 +53,11 @@ void take_next_step(process_params_t par)
 
 	//printf("File: %s, pointer: %p\n",new_file, sh_graph->current);	
 	
-
 	if (sh_graph->current != NULL) {
-		char * file = sh_graph->current->instruction_process->
+		file = sh_graph->current->instruction_process->
 					instruction_type->params->file;
-		int file_length = strlen(file);
-		char * new_file = calloc(file_length + 1, sizeof(char));
+		file_length = strlen(file);
+		new_file = calloc(file_length + 1, sizeof(char));
 	
 		memcpy(new_file, file, file_length);
 		memcpy(&next_process_params, sh_graph->current->
@@ -65,12 +67,11 @@ void take_next_step(process_params_t par)
 		next_process_params.file = new_file;
 		shmdt(sh_graph);
 		call_next_process(*par->c_status, &next_process_params);
+		free(next_process_params.file);
 	}else{		
 		call_next_process(*par->c_status, server_receive_params);	
 		shmctl(par->c_status->g_header.fd, IPC_RMID, 0);
 	}
-	
-
 	//pthread_mutex_unlock(&mutex);
 }
 
@@ -107,7 +108,7 @@ void run_process(status_t c_status, void * (* execute_func) (void *))
 
 void * call_function(void * v_params)
 {
-	process_params_t thread_args;
+	process_params_t func_params;
 	pthread_t thread_id;
 	
 	graph_t mem;
@@ -124,9 +125,10 @@ void * call_function(void * v_params)
 
 	//thread_args = pre_execute(c_status, mem);
 	//pthread_mutex_unlock(&mutex);
-	
-	exec_func(pre_execute(c_status, mem));
-	
+	func_params = pre_execute(c_status, mem);
+	exec_func(func_params);
+	free(func_params);
+	pthread_exit(NULL);
 	//pthread_create(&thread_id, NULL, exec_func, thread_args);
 	//func(thread_args);
 }

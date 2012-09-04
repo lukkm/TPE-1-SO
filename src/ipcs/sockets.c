@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <ctype.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
@@ -66,13 +67,14 @@ void ipc_create(ipc_params_t params){
 	//BINDING AF_UNIX
 
 	local.sun_family = AF_UNIX;  /* local is declared before socket() ^ */
+	
 	strcpy(local.sun_path, "/tmp");
 	unlink(local.sun_path);
 	len = strlen(local.sun_path) + sizeof(local.sun_family);
-	 printf("Params SOCK FD: %d \n",params->sockfd);
+	printf("Params SOCK FD: %d \n", params->sockfd);
 	if((bind(params->sockfd, (struct sockaddr *)&local, len) == -1))
 	{
-		
+		printf("%d\n", errno);
 		perror("Bind call Failed \n");
 		exit(1);
 	}
@@ -88,30 +90,23 @@ void ipc_create(ipc_params_t params){
 	}*/
 
 	listenv = listen(params->sockfd,5);
-	 printf("Listen value: %d \n",listenv);
+	printf("Listen value: %d \n",listenv);
+	
 	if( listenv == -1)
 	{
 	 	perror("Listen call Failed \n");
 		exit(1);
 	}
-	 len = sizeof(remote);
-	while(1)
-{	
+	len = sizeof(remote);
 	newsockfd = accept(params->sockfd, (struct sockaddr *)&remote, &len);
 	printf("New socket File Descriptor: %d \n\n",newsockfd);
-	if(newsockfd == -1)
-		{
-			
-			
+	 if(newsockfd == -1)
+		{		
 		 	perror("Accept Connection call Failed \n");
-			//continue;
 		}
-		printf("New socket File Descriptor: %d \n\n",newsockfd);
-		sleep(1);
-}
+	printf("New socket File Descriptor: %d \n\n",newsockfd);
 	
-
-
+	
 }
 
 
@@ -119,23 +114,21 @@ void ipc_create(ipc_params_t params){
 void ipc_open(ipc_params_t params, int action){
 	
 
-        //  int client_sockfd;
-	  struct sockaddr_in server = {AF_INET,7000};
-          server.sin_addr.s_addr = inet_addr("206.45.10.2");
+	//  int client_sockfd;
+	struct sockaddr_in server = {AF_INET,7000};
+	server.sin_addr.s_addr = inet_addr("206.45.10.2");
 	
-	  if ((params->client_sockfd=socket(AF_INET, SOCK_STREAM,0)) == -1)
-	  {
+	if ((params->client_sockfd=socket(AF_INET, SOCK_STREAM,0)) == -1)
+	{
 		perror("Client Socket Creation call Failed \n");	
 		exit(1);
-	  }
+	}
 
-	  if( connect(params->client_sockfd, (struct sockaddr*)&server, sizeof(struct sockaddr_in)) == -1)
- 	  {
+	if( connect(params->client_sockfd, (struct sockaddr*)&server, sizeof(struct sockaddr_in)) == -1)
+	{
 		perror("Client Socket Connect call Failed \n");	
 		exit(1);
-	  }
-	
-	
+	}	
 }
 
 void ipc_destroy(ipc_params_t params){

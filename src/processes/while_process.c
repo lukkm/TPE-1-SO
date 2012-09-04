@@ -14,6 +14,8 @@
 void* execute_while (void*);
 void init_processes(void);
 
+int i = 0;
+
 process_t while_process;
 ipc_params_t server_receive_params;
 
@@ -35,6 +37,10 @@ void * execute_while(void * structure_params){
 	
 		process_params_t par = (process_params_t) structure_params;
 		graph_t mem = par->sh_graph;
+		//if (par->c_status->cursor == 559){
+		//	printf("%d\n", par->c_status->cursor);
+		//}
+		//if (par->c_status->cursor == ){
 		
 		if (!mem->current->cond_executed){
 			mem->current->cond_executed = 1;

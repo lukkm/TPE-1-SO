@@ -15,6 +15,7 @@ void* execute_cz (void*);
 void init_processes(void);
 
 process_t cz_process;
+int i = 0;
 
 int main(void)
 {

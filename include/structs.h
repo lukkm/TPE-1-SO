@@ -10,7 +10,8 @@ typedef struct status{
 	long mtype;
 	int mem[1000], 
 		cursor, 
-		flag;
+		flag,
+		client_id;
 	struct shared_graph_header g_header;
 } status;
 

@@ -16,6 +16,8 @@ void init_processes(void);
 
 process_t endwhile_process;
 
+int i = 0;
+
 int main(void)
 {
 	status c_program;
@@ -30,6 +32,7 @@ int main(void)
 }
 
 void * execute_endwhile(void * structure_params){
+	
 	process_params_t par = (process_params_t) structure_params;
 	true_step(par);
 	return NULL;

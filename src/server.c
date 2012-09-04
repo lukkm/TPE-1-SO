@@ -60,6 +60,8 @@ main(void)
 	
 	pthread_t thread_id;
 	thread_status_t thread_info;
+	ipc_params_t client_params;
+	status client_final;
 	
 	init_processes();
 	init();
@@ -88,15 +90,20 @@ main(void)
 			thread_info->client_id = header->client_id;
 			pthread_create(&thread_id, NULL, &run_program, thread_info);			
 		}	
+		if(ipc_receive(server_receive_params, &client_final, sizeof(struct status))){
+			
+			client_params = get_params_from_pid(client_final.client_id, PROGRAM_STATUS, sizeof(struct status));
+			
+			ipc_open(client_params, O_WRONLY);
+			ipc_send(client_params, &client_final, sizeof(struct status));
+			ipc_close(client_params);
+		}
 	}
-		
-
 	return 0;
 }
 
 void * run_program(void * program_stat)
 {
-	ipc_params_t client_params;
 	graph_t c_graph;
 	int memkey, i;
 	status client_program;
@@ -112,25 +119,20 @@ void * run_program(void * program_stat)
 						&memkey, &client_program.g_header);
 		client_program.cursor = 0;
 		client_program.flag = FALSE;
+		client_program.client_id = thread_info->client_id;
 		
 		for(i = 0; i < MEM_SIZE; i++){
 			client_program.mem[i] = 0;
 		}
+		
 		process_type = c_graph->first->instruction_process->instruction_type;
 		client_program.mtype = process_type->params->unique_mq_id;
+		
 		ipc_send(process_type->params, &client_program, sizeof(struct status));
 	}else{
 		printf("Entrada incorrecta\n");
 	}
-	while(!ipc_receive(server_receive_params, &client_program, 
-												sizeof(struct status)))
-		sleep(1);
-	
-	client_params = get_params_from_pid(thread_info->client_id, PROGRAM_STATUS, sizeof(struct status));
-	
-	ipc_open(client_params, O_WRONLY);
-	ipc_send(client_params, &client_program, sizeof(struct status));
-	ipc_close(client_params);
+	pthread_exit(NULL);
 }
 
 void init(){
