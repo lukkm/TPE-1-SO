@@ -61,11 +61,14 @@ void ipc_send(ipc_params_t params, void * message, int size)
 	//printf("%d\n", ((client_header_t)message)->client_id);
 	//printf("%d\n", ((client_header_t)message)->program_size);
 	
-	sem_post(params->semid, params->shmem_name);
-	sem_wait(params->semid, params->shmem_name);
+	//sem_wait(params->semid, params->shmem_name);
+	//sem_post(params->semid, params->shmem_name);
 	//printf("pasa\n");
 	
+	sem_consume(params->semid, params->shmem_name);
+	
 	memcpy(params->shared_memory_address, message, size);
+	
 	
 	//printf("%d\n", ((client_header_t)params->shared_memory_address)->client_id);
 	//printf("%d\n", ((client_header_t)params->shared_memory_address)->program_size);
