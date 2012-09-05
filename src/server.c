@@ -78,7 +78,7 @@ main(void)
 		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0)
 		{
 			read_string = calloc(1, header->program_size);
-			printf("%d %d\n", header->client_id, header->program_size);
+			printf("%d %d\n", header->program_size, header->client_id);
 			server_params->msg_type = PROGRAM_STRING;
 			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
@@ -92,10 +92,10 @@ main(void)
 			pthread_join(thread_id, NULL);
 			free(read_string);
 			free(thread_info);
-		}	
+		}
 		if(ipc_receive(server_receive_params, &client_final, sizeof(struct status))){
 			
-			client_params = get_params_from_pid(client_final.client_id, PROGRAM_STATUS, sizeof(struct status));
+			client_params = get_params_from_pid(client_final.client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);
 			
 			ipc_open(client_params, O_WRONLY);
 			ipc_send(client_params, &client_final, sizeof(struct status));
@@ -138,8 +138,9 @@ void * run_program(void * program_stat)
 	pthread_exit(NULL);
 }
 
-void init(){
-	int i, j, k, pid;
+void init()
+{
+	int i, j, k, pid, aux_semid;
 	int string_length;
 	int to_exec_length;
 	char * to_exec;
@@ -150,8 +151,6 @@ void init(){
 	
 	ipc_create(server_receive_params);
 	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
-
-	//sem_init(&sem,0,0);
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
 		
@@ -175,7 +174,7 @@ void init(){
 				break;
 		}
 		(*(process_list[i]))->params->unique_id = pid;
-		ipc_create((*process_list[i])->params);		
+		ipc_create((*process_list[i])->params);	
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 	}
 
@@ -190,6 +189,8 @@ void server_close(){
 
 	for(i = 0; i < CANT_INSTRUCTIONS; i++)
 		ipc_destroy((*(process_list[i]))->params);
+
+	semctl(server_params->semid, 293845, IPC_RMID);
 
 	ipc_destroy(server_params);
 	ipc_destroy(server_receive_params);

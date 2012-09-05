@@ -1,12 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
+#include <sys/sem.h>
+#include <sys/types.h>
 
 #include "../../include/structs.h"
 #include "../../include/defs.h"
 #include "../../include/ipcs/ipcs.h"
 
 void create_processes();
-void create_processes_information();
+void create_processes_information(int);
 
 int i;
 
@@ -26,12 +28,27 @@ ipc_params_t server_params;
 process_t * process_list[CANT_INSTRUCTIONS];
 char * process_name_list[CANT_INSTRUCTIONS];
 
+int init_sem(){
+	
+	int semid, i;
+	
+	if ( (semid = semget(190690, SEMSET_SIZE, IPC_CREAT | 0666)) == -1 )
+		exit(1);
+	
+	for ( i = 0; i < SEMSET_SIZE; i++ )
+		semctl(semid, i, SETVAL, 0);
+	
+	return semid;
+}
+
 void init_processes(){
 	
-	int i;
+	int i, aux_semid;
 	
 	char * ct_sv_rec_params = "/tmp/sv_receive";
 	char * ct_sv_params = "/tmp/server";
+	
+	aux_semid = init_sem();
 	
 	server_receive_params = calloc(1, sizeof(struct ipc_params));
 	server_receive_params->file = calloc(1, strlen(ct_sv_rec_params) + 1);
@@ -39,12 +56,16 @@ void init_processes(){
 	server_receive_params->shm_segment_size = sizeof(struct status);
 	server_receive_params->unique_id = 30000;
 	server_receive_params->msg_type = PROGRAM_STATUS;
+	server_receive_params->shmem_name = SVR_RCV;
+	server_receive_params->semid = aux_semid;
 	
 	server_params = calloc(1,sizeof(struct ipc_params));
 	server_params->file = calloc(1, strlen(ct_sv_params) + 1);
 	strcpy(server_params->file, ct_sv_params);
 	server_params->shm_segment_size = sizeof(struct client_header) + MAX_PROGRAM_LENGTH;
 	server_params->unique_id = 30001;
+	server_params->shmem_name = SVR_PAR;
+	server_params->semid = aux_semid;
 
 	process_list[0] = &inc_process;
 	process_list[1] = &dec_process; 
@@ -66,9 +87,8 @@ void init_processes(){
 	process_name_list[7] = "while";
 	process_name_list[8] = "endwhile";
 
-	for (i = 0; i < CANT_INSTRUCTIONS; i++){
+	for (i = 0; i < CANT_INSTRUCTIONS; i++)
 		*(process_list[i]) = calloc(1, sizeof(struct process));
-	}
 
 	inc_process->type = INC;
 	dec_process->type = DEC;
@@ -80,13 +100,13 @@ void init_processes(){
 	while_process->type = WHILE;	
 	endwhile_process->type = ENDWHILE;	
 
-	create_processes_information();
+	create_processes_information(aux_semid);
 		
 }
 
-void create_processes_information(){
+void create_processes_information(int aux_semid){
 	int i, j, pid;
-	int string_length;
+	int string_length, shmem = SVR_PAR + 1;
 	char * string_name;
 	char * ct_tmp = "/tmp/";
 	
@@ -102,7 +122,8 @@ void create_processes_information(){
 		(*(process_list[i]))->params->shm_segment_size = sizeof(struct status);
 		(*(process_list[i]))->params->unique_id = getpid();
 		(*(process_list[i]))->params->msg_type = PROGRAM_STATUS;
-		
+		(*(process_list[i]))->params->shmem_name = shmem + i;
+		(*(process_list[i]))->params->semid = aux_semid;
 	}
 }
 

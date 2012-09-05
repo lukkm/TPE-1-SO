@@ -5,10 +5,17 @@
 #include <errno.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 
 #include "../../include/structs.h"
 #include "../../include/defs.h"
 #include "../../include/ipcs/ipcs.h"
+
+void sem_consume(int semid, cursor_t shmem_name);
+void sem_post(int semid, cursor_t shmem_name);
+void sem_wait(int semid, cursor_t shmem_name);
 
 void
 fatal(char *s)
@@ -19,28 +26,27 @@ fatal(char *s)
 
 void ipc_create(ipc_params_t params)
 {	
-		
-	struct shmid_ds shmbuffer;
-	int segment_size = params->shm_segment_size, key=0;
+	//struct shmid_ds shmbuffer;
+	int segment_size = params->shm_segment_size;
 	void * shmem_address;
 
-	params->segment_id = shmget(params->unique_id, 
-			segment_size + sizeof(int), IPC_CREAT | S_IRUSR | S_IWUSR);
-	shmem_address = shmat (params->segment_id, NULL, 0666);
-	memcpy(shmem_address, &key, sizeof(int));
-	shmdt(shmem_address);
+	params->segment_id = shmget(params->unique_id, segment_size, 
+								IPC_CREAT | 0666);
+	//shmem_address = shmat(params->segment_id, NULL, 0666);
+	//shmdt(shmem_address);
 }
 
 void ipc_destroy(ipc_params_t params)
 {	
 	shmctl(params->segment_id, IPC_RMID, 0);
 }
-
+	
 void ipc_open(ipc_params_t params, int action)
 {
 	/* Attach the shared memory segment. */
 	params->segment_id = shmget(params->unique_id, 
-						params->shm_segment_size + sizeof(int), 0666);
+						params->shm_segment_size, 0666);
+	
 	params->shared_memory_address = (char*) shmat (params->segment_id, 
 													NULL, action);
 }
@@ -51,33 +57,72 @@ void ipc_close(ipc_params_t params)
 }
 
 void ipc_send(ipc_params_t params, void * message, int size)
-{	
-	void * new_address = params->shared_memory_address + sizeof(int);
-	int key, i;
+{
+	//printf("%d\n", ((client_header_t)message)->client_id);
+	//printf("%d\n", ((client_header_t)message)->program_size);
 	
-	do 
-	{
-		memcpy(&key, params->shared_memory_address, sizeof(int));
-	} while(key);
+	sem_post(params->semid, params->shmem_name);
+	sem_wait(params->semid, params->shmem_name);
+	//printf("pasa\n");
 	
-	key = params->unique_id;
+	memcpy(params->shared_memory_address, message, size);
 	
-	memcpy(params->shared_memory_address, &key, sizeof(int));
-	memcpy(new_address, message, size);
+	//printf("%d\n", ((client_header_t)params->shared_memory_address)->client_id);
+	//printf("%d\n", ((client_header_t)params->shared_memory_address)->program_size);
+	
+	//printf("%d %d %d\n", semctl(params->semid, params->shmem_name, GETVAL), params->semid, params->shmem_name);
 }
 
 int ipc_receive(ipc_params_t params, void * buffer, int size)
-{
-	int key;
-	void * new_address = params->shared_memory_address + sizeof(int);
+{	
+	//printf("%d %d\n", params->shmem_name, semctl(params->semid, params->shmem_name, GETVAL));
 	
-	memcpy(&key, params->shared_memory_address, sizeof(int));
-	
-	if (!key)
+	if ( !semctl(params->semid, params->shmem_name, GETVAL) )
 		return 0;
+		
+	//printf("%d %d %d\n", semctl(params->semid, params->shmem_name, GETVAL), params->semid, params->shmem_name);
+		
+	memcpy(buffer, params->shared_memory_address, size);
 	
-	memcpy(buffer,new_address,size);
-	key = 0;
-	memcpy(params->shared_memory_address, &key, sizeof(int));
+	//printf("%d\n", ((client_header_t)params->shared_memory_address)->client_id);
+	//printf("%d\n", ((client_header_t)params->shared_memory_address)->program_size);
+	
+	sem_consume(params->semid, params->shmem_name);
+	
+	//printf("%d %d %d\n", semctl(params->semid, params->shmem_name, GETVAL), params->semid, params->shmem_name);
+	
 	return size;
+}
+
+void sem_wait(int semid, cursor_t shmem_name) 
+{
+	struct sembuf sem;
+	
+	sem.sem_num = shmem_name;
+	sem.sem_op = 0;
+	sem.sem_flg = 0;
+	
+	semop( semid, &sem, 1 );
+}
+
+void sem_post(int semid, cursor_t shmem_name)
+{
+	struct sembuf sem;
+	
+	sem.sem_num = shmem_name;
+	sem.sem_op = 1;
+	sem.sem_flg = 0;
+	
+	semop( semid, &sem, 1 );
+}
+
+void sem_consume(int semid, cursor_t shmem_name)
+{
+	struct sembuf sem;
+	
+	sem.sem_num = shmem_name;
+	sem.sem_op = -1;
+	sem.sem_flg = 0;
+	
+	semop( semid, &sem, 1 );
 }

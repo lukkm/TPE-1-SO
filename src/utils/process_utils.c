@@ -140,7 +140,7 @@ void * call_function(void * v_params)
 	//func(thread_args);
 }
 
-ipc_params_t get_params_from_pid(int pid, int type, int shm_size)
+ipc_params_t get_params_from_pid(int pid, int type, int shm_size, int aux_semid)
 {
 	ipc_params_t params = calloc(1, sizeof(struct ipc_params));
 	int aux = pid, cont = 0;
@@ -167,6 +167,9 @@ ipc_params_t get_params_from_pid(int pid, int type, int shm_size)
 		params->file[cont--] = pid % 10 + '0';
 		pid /= 10;
 	}
+	
+	params->shmem_name = SEMSET_SIZE - 1;
+	params->semid = aux_semid;
 	
 	return params;
 }

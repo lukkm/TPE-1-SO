@@ -1,5 +1,7 @@
 #include <pthread.h>
 
+typedef unsigned int cursor_t;
+
 typedef struct shared_graph_header{
 	struct graph * mem_adress;	
 	int fd;
@@ -65,9 +67,13 @@ typedef struct ipc_params{
 	/*------------------*/
 
 	/* SHARED MEMORY PARAMS */
+	
+	int semid;
+	cursor_t shmem_name;
 	int shm_segment_size;
 	int segment_id;
-	void* shared_memory_address; // IDIOTA VOS PUTO!!! //EL LUKO DIJO QUE ERA VOID
+	void* shared_memory_address;
+	
 	//char* msg;
 
 	/*------------------*/

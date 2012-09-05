@@ -26,8 +26,6 @@ int main(int argc, char ** argv){
 		return 0;
 	}
 
-	client_params = get_params_from_pid(getpid(), PROGRAM_STATUS, sizeof(struct status));
-
 	client_header_t header = calloc(1, sizeof(struct client_header));
 	header->program_size = strlen(program_name);
 	header->client_id = getpid();
@@ -41,6 +39,8 @@ int main(int argc, char ** argv){
 	ipc_send(server_params, program_name, header->program_size);
 	
 	ipc_close(server_params);
+	
+	client_params = get_params_from_pid(getpid(), PROGRAM_STATUS, sizeof(struct status), server_params->semid);
 	
 	ipc_create(client_params);
 	ipc_open(client_params, O_RDONLY);
