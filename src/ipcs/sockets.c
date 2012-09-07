@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define NOTSET -1
+#define READ_LENGTH 5
 
 #include "../../include/structs.h"
 #include "../../include/utils/parser.h"
@@ -20,12 +20,6 @@
 #include "../../include/ipcs/ipcs.h"
 
 void server_listen(void);
-
-
-
-
-static int socketserv = NOTSET;
-static int socketclient = NOTSET;
 
 struct sockaddr_un create_struct_sockaddr(ipc_params_t params){
 	struct sockaddr_un new_struct;
@@ -45,20 +39,20 @@ fatal(char *s)
 
 void ipc_create(ipc_params_t params){	
 
-	unsigned int len;
+	/*unsigned int len;
 	int bind_value, listenv	;
 	struct sockaddr_un socket_params;
 
  	printf("\nCreating a socket server \n\n");	
-	if ((params->sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+	if ((params->sockfd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
 	{
 		perror("Socket Creation Failed \n");
 		exit(1);
 	}
 
 	printf("errno: %d\n", errno);
-
-	socket_params = create_struct_sockaddr(params);
+*/
+	/*socket_params = create_struct_sockaddr(params);
 	
 	unlink(socket_params.sun_path);
 	
@@ -74,11 +68,10 @@ void ipc_create(ipc_params_t params){
 	if(bind_value == -1){
 	  perror("Bind call Failed \n");
 	  exit(1);
-	}
+	}*/
 	
-	printf("Bind value: %d\n", bind_value);	
 		  
-	listenv = listen(params->sockfd, 5);
+	/*listenv = listen(params->sockfd, 5);
 
 	if(listenv == -1){
 	  perror("Listen call Failed \n");
@@ -90,7 +83,7 @@ void ipc_create(ipc_params_t params){
 	
 	if ((params->client_sockfd = accept(params->sockfd, (struct sockaddr *)&socket_params, &len)) == -1) {
 		error("Error accepting connection from socket %d", params->sockfd);
-    }
+    }*/
 }
 
 
@@ -98,20 +91,83 @@ void ipc_open(ipc_params_t params, int action){
 	
 	  struct sockaddr_un socket_params;
 	  socklen_t size = sizeof(struct sockaddr_un);
-	  int listenv;
-	  socket_params = create_struct_sockaddr(params);
+	  int len, bind_value;
+	  char * old_file;
+	  char * ct_read = "read";
 		  
 	  if(params->sockfd == -1){
-		  if ((params->sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1){
+		  
+		  if ((params->sockfd = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1){
 			perror("Socket Creation Failed \n");
 			exit(1);
-			} 
+			}
 			
+		if(!params->socklistener){
+			socket_params = create_struct_sockaddr(params);
+
+			unlink(socket_params.sun_path);
+			
+			printf("Sun Path: %s\n", socket_params.sun_path);
+			
+			len = strlen(socket_params.sun_path) + sizeof(socket_params.sun_family);
+			
+			printf("Params SOCK FD: %d \n", params->sockfd);
+			printf("errno: %d\n", errno);
+
+			bind_value = bind(params->sockfd, (struct sockaddr *)&socket_params, len);
+			
+			if(bind_value == -1){
+			  perror("Bind call Failed \n");
+			  exit(1);
+			}
+			
+			params->socklistener = 1;
+		}
+		
+		/*socket_params = create_struct_sockaddr(params);
+		
 		if( connect(params->sockfd, (struct sockaddr*)&socket_params, size) == -1){
 		   printf("Errno client: %d\n", errno);
 		   perror("Client Socket Connect call Failed \n");	
 		   exit(1);
-	   }
+	   }*/
+		
+		/*
+		old_file = params->file
+		total_length = strlen(old_file) + READ_LENGTH;
+		params->file = calloc(total_length);
+		strcpy(params->file, old_file);
+		strcat(params->file, ct_read);
+		params->file[total_length - 1] = 0;
+		
+		
+		socket_params = create_struct_sockaddr(params);
+		
+		
+		bind_value = bind(params->sockfd, (struct sockaddr *)&socket_params, len);
+	
+		if(bind_value == -1){
+		  perror("Bind call Failed \n");
+		  exit(1);
+		}
+		
+		printf("Bind value: %d\n", bind_value);	
+			  
+		listenv = listen(params->sockfd, 5);
+
+		if(listenv == -1){
+		  perror("Listen call Failed \n");
+		  exit(1);
+		}
+		printf("Listening... %d \n",listenv);
+		printf("errno: %d\n", errno);
+		printf("Waiting for connection... %d \n",listenv);
+		
+		if ((params->client_sockfd = accept(params->sockfd, (struct sockaddr *)&socket_params, &len)) == -1) {
+			error("Error accepting connection from socket %d", params->sockfd);
+		}
+		*/	
+		
 	  }	
 
 	  
@@ -120,15 +176,16 @@ void ipc_open(ipc_params_t params, int action){
 
 void ipc_close(ipc_params_t params){
 	
-	printf("Cerrando Cliente \n");
-	close(params->client_sockfd);
-	close(params->sockfd);
+	printf("Cerrando IPC \n");
+	//close(params->client_sockfd);
+	//close(params->sockfd);
 }
 
 void ipc_closesrv(ipc_params_t params){
 	
 	printf("Cerrando Server \n");
 	close(params->sockfd);
+	unlink(params->file);
 }
 
 void ipc_send(ipc_params_t params, void * message, int size){
@@ -144,9 +201,20 @@ void ipc_send(ipc_params_t params, void * message, int size){
 	//write_text(socket_fd, message);
 	//close (socket_fd);
 	//return 0;
-	
-	write(params->sockfd, message, size);
-	
+	/*if (params->client_sockfd != -1)
+		write(params->client_sockfd, message, size);
+	else
+		write(params->sockfd, message, size);
+	*/
+	struct sockaddr_un socket_params;
+	int len;
+	socket_params = create_struct_sockaddr(params);
+	len = sizeof(struct sockaddr_un);
+	int sockfd = socket(AF_UNIX, SOCK_DGRAM, 0);
+	printf("params->sockfd = %d, sun path = %s\n", params->sockfd, socket_params.sun_path);
+	sendto(sockfd, message, size, 0, (struct sockaddr *) &socket_params, len);
+	printf("Errno after sending: %d\n", errno);
+	close(sockfd);
 }
 
 void write_text (int socket_fd, const char* text)
@@ -175,11 +243,12 @@ int ipc_receive(ipc_params_t params, void * buffer, int size){
 	
 	printf("Recibiendo: %s\n", (char*) text);
 	free(text);*/
-	if (params->client_sockfd != -1){
-		read(params->client_sockfd, buffer, size);
-	}else{
-		read(params->sockfd, buffer, size);
-	}
+	struct sockaddr_un socket_params;
+	int len;
+	socket_params = create_struct_sockaddr(params);
+	len = sizeof(struct sockaddr_un);
+	printf("sockfd = %d \n", params->sockfd);
+	return recvfrom(params->sockfd, buffer, size, 0, (struct sockaddr *)&socket_params, &len);
 }
 
 void ipc_destroy(ipc_params_t params){

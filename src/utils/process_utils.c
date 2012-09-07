@@ -35,6 +35,7 @@ process_params_t pre_execute(status_t program, graph_t mem)
 }
 
 void call_next_process(status c_status, ipc_params_t params){
+	printf("Llamando prox proceso...\n");
 	ipc_open(params, O_WRONLY);
 	ipc_send(params, &c_status, sizeof(struct status));
 	ipc_close(params);
@@ -70,6 +71,7 @@ void take_next_step(process_params_t par)
 		call_next_process(*par->c_status, &next_process_params);
 		free(next_process_params.file);
 	}else{		
+		server_receive_params->socklistener = TRUE;
 		call_next_process(*par->c_status, server_receive_params);	
 		shmctl(par->c_status->g_header.fd, IPC_RMID, 0);
 	}
@@ -149,6 +151,7 @@ ipc_params_t get_params_from_pid(int pid, int type, int shm_size, int aux_semid)
 	params->unique_id = pid;
 	params->msg_type = type;
 	params->shm_segment_size = shm_size;
+	params->sockfd = -1;
 	
 	while(aux > 0)
 	{

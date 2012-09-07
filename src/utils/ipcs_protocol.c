@@ -58,6 +58,8 @@ void init_processes(){
 	server_receive_params->msg_type = PROGRAM_STATUS;
 	server_receive_params->shmem_name = SVR_RCV;
 	server_receive_params->semid = aux_semid;
+	server_receive_params->sockfd = -1;
+	server_receive_params->client_sockfd = -1;
 	
 	server_params = calloc(1,sizeof(struct ipc_params));
 	server_params->file = calloc(1, strlen(ct_sv_params) + 1);
@@ -66,6 +68,8 @@ void init_processes(){
 	server_params->unique_id = 30001;
 	server_params->shmem_name = SVR_PAR;
 	server_params->semid = aux_semid;
+	server_params->sockfd = -1;
+	server_params->client_sockfd = -1;
 
 	process_list[0] = &inc_process;
 	process_list[1] = &dec_process; 
@@ -124,6 +128,8 @@ void create_processes_information(int aux_semid){
 		(*(process_list[i]))->params->msg_type = PROGRAM_STATUS;
 		(*(process_list[i]))->params->shmem_name = shmem + i;
 		(*(process_list[i]))->params->semid = aux_semid;
+		(*(process_list[i]))->params->sockfd = -1;
+		(*(process_list[i]))->params->client_sockfd = -1;
 	}
 }
 
