@@ -4,7 +4,7 @@
 #define MAX_IPC_SIZE 8190
 #define MAX_PROGRAM_LENGTH 1000
 
-#define BIN_LENGTH 4
+#define PATH_LENGTH 10
 #define TMP_LENGTH 5
 
 #define PRE_HEADER 6

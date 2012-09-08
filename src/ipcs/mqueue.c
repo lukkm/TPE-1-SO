@@ -38,6 +38,14 @@ fatal(char *s)
 	exit(1);
 }
 
+char * get_ipc_path(){
+	char * path;
+	path = calloc(12, sizeof(char));
+	strcpy(path, "bin/mqueue/"); 
+	path[11] = 0;
+	return path;
+}
+
 void ipc_create(ipc_params_t params){
 	if ((params->unique_mq_id = msgget((key_t)params->unique_id, IPC_CREAT | 0666)) == -1)
 		perror("Error in MessageQueue Allocation");

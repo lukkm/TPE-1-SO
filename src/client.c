@@ -37,6 +37,8 @@ int main(int argc, char ** argv){
 	server_params->msg_type = PRE_HEADER;
 	ipc_send(server_params, header, sizeof(struct client_header));
 	
+	//free(header);
+	
 	server_params->msg_type = PROGRAM_STRING;
 	ipc_send(server_params, program_name, header->program_size);
 	
@@ -50,10 +52,19 @@ int main(int argc, char ** argv){
 	ipc_close(client_params);
 	ipc_destroy(client_params);
 	
-	for (i = 0; i < MEM_SIZE; i++){
-		printf("%d ", cl_program.mem[i]);
+	if (cl_program.flag == -1){
+		printf("File error\n");
+	}else{
+		printf("\nResult for program %d: \n", getpid());
+		printf("--------------------------\n");
+		printf("Flag: %s\n", cl_program.flag ? "True" : "False");
+		printf("--------------------------\n");
+		printf("Memory status:\n");
+		for (i = 0; i < MEM_SIZE; i++){
+			printf("%d ", cl_program.mem[i]);
+		}
+		printf("\n\n");
 	}
-	printf("\n");
 
 	return 0;
 }

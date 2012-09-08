@@ -37,6 +37,14 @@ fatal(char *s)
 	exit(1);
 }
 
+char * get_ipc_path(){
+	char * path;
+	path = calloc(13, sizeof(char));
+	strcpy(path, "bin/sockets/"); 
+	path[12] = 0;
+	return path;
+}
+
 void ipc_create(ipc_params_t params){	
 	
 }
@@ -77,19 +85,6 @@ void ipc_open(ipc_params_t params, int action){
 	  }	
 
 	  
-}
-
-
-void ipc_close(ipc_params_t params){
-	//close(params->client_sockfd);
-	//close(params->sockfd);
-}
-
-void ipc_closesrv(ipc_params_t params){
-	
-	printf("Cerrando Server \n");
-	close(params->sockfd);
-	unlink(params->file);
 }
 
 void ipc_send(ipc_params_t params, void * message, int size){

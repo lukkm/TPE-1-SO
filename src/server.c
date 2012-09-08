@@ -62,10 +62,10 @@ main(void)
 	pthread_t thread_id, receive_thread_id;
 	thread_status_t thread_info;
 	
+	signal(SIGINT, server_close);
+	
 	init_processes();
 	init();
-
-	signal(SIGINT, server_close);
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
 	
@@ -104,6 +104,7 @@ void * run_program(void * program_stat)
 	int memkey, i;
 	status client_program;
 	process_t process_type;
+	ipc_params_t client_params;
 	
 	thread_status_t thread_info = (thread_status_t)program_stat;
 
@@ -126,7 +127,12 @@ void * run_program(void * program_stat)
 		printf("Mandando primera instruccion...\n");
 		ipc_send(process_type->params, &client_program, sizeof(struct status));
 	}else{
-		printf("Entrada incorrecta\n");
+		client_params = get_params_from_pid(thread_info->client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);			
+		client_params->socklistener = TRUE;
+		client_program.flag = -1;
+		ipc_open(client_params, O_WRONLY);
+		ipc_send(client_params, &client_program, sizeof(struct status));
+		ipc_close(client_params);
 	}
 	pthread_exit(NULL);
 }
@@ -137,7 +143,10 @@ void init()
 	int string_length;
 	int to_exec_length;
 	char * to_exec;
-	char * ct_bin = "bin/";
+	int ct_length;
+	char * ct_path = get_ipc_path();
+	
+	ct_length = strlen(ct_path);
 	
 	ipc_create(server_params);
 	ipc_open(server_params, O_RDONLY);
@@ -151,13 +160,12 @@ void init()
 				break;
 			case 0: /* Hijo */
 				(*(process_list[i]))->pid = getpid();
-				to_exec_length = strlen(process_name_list[i]) + BIN_LENGTH + 1;
+				to_exec_length = strlen(process_name_list[i]) + ct_length + 1;
 				to_exec = calloc(1, to_exec_length);
-				strcpy(to_exec, ct_bin);
+				strcpy(to_exec, ct_path);
 				strcat(to_exec, process_name_list[i]);
 				to_exec[to_exec_length - 1] = 0;
 				execvp(to_exec, NULL);		
-				
 				/* No deberia llegar aca */
 				perror("Process error");
 				exit(1);
@@ -168,6 +176,8 @@ void init()
 		ipc_create((*process_list[i])->params);	
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 	}
+	
+	free(ct_path);
 
 }
 

@@ -24,6 +24,14 @@ fatal(char *s)
 	exit(1);
 }
 
+char * get_ipc_path(){
+	char * path;
+	path = calloc(11, sizeof(char));
+	strcpy(path, "bin/shmem/"); 
+	path[10] = 0;
+	return path;
+}
+
 void ipc_create(ipc_params_t params)
 {	
 	//struct shmid_ds shmbuffer;
