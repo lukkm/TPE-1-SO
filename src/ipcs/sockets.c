@@ -87,6 +87,11 @@ void ipc_open(ipc_params_t params, int action){
 	  
 }
 
+void ipc_close(ipc_params_t params){
+	//close(params->client_sockfd);
+	//close(params->sockfd);
+}
+
 void ipc_send(ipc_params_t params, void * message, int size){
 	
 	struct sockaddr_un socket_params;
