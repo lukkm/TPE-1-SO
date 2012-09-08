@@ -160,7 +160,8 @@ ipc_params_t get_params_from_pid(int pid, int type, int shm_size, int aux_semid)
 		pid /= 10;
 	}
 	
-	params->shmem_name = SEMSET_SIZE - 1;
+	params->rd_sem = SEMSET_SIZE - 2;
+	params->wr_sem = SEMSET_SIZE - 1;
 	params->semid = aux_semid;
 	
 	return params;

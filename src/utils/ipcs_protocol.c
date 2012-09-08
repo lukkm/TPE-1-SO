@@ -2,6 +2,7 @@
 #include <string.h>
 #include <sys/sem.h>
 #include <sys/types.h>
+#include <stdio.h>
 
 #include "../../include/structs.h"
 #include "../../include/defs.h"
@@ -36,7 +37,16 @@ int init_sem(){
 		exit(1);
 	
 	for ( i = 0; i < SEMSET_SIZE; i++ )
-		semctl(semid, i, SETVAL, 0);
+	{
+		if (i % 2 == 0)
+			semctl(semid, i, SETVAL, 1);
+		else
+			semctl(semid, i, SETVAL, 0);
+	}
+		
+	for ( i = 0; i < SEMSET_SIZE; i++ )
+		printf("%d ", semctl(semid, i, GETVAL));
+	printf("\n");
 	
 	return semid;
 }
@@ -56,7 +66,8 @@ void init_processes(){
 	server_receive_params->shm_segment_size = sizeof(struct status);
 	server_receive_params->unique_id = 30000;
 	server_receive_params->msg_type = PROGRAM_STATUS;
-	server_receive_params->shmem_name = SVR_RCV;
+	server_receive_params->wr_sem = SVR_RCV_WR;
+	server_receive_params->rd_sem = SVR_RCV_RD;
 	server_receive_params->semid = aux_semid;
 	server_receive_params->sockfd = -1;
 	server_receive_params->client_sockfd = -1;
@@ -66,7 +77,8 @@ void init_processes(){
 	strcpy(server_params->file, ct_sv_params);
 	server_params->shm_segment_size = sizeof(struct client_header) + MAX_PROGRAM_LENGTH;
 	server_params->unique_id = 30001;
-	server_params->shmem_name = SVR_PAR;
+	server_params->wr_sem = SVR_PAR_WR;
+	server_params->rd_sem = SVR_PAR_RD;
 	server_params->semid = aux_semid;
 	server_params->sockfd = -1;
 	server_params->client_sockfd = -1;
@@ -110,7 +122,7 @@ void init_processes(){
 
 void create_processes_information(int aux_semid){
 	int i, j, pid;
-	int string_length, shmem = SVR_PAR + 1;
+	int string_length, sem_cur = SVR_PAR_WR + 1;
 	char * string_name;
 	char * ct_tmp = "/tmp/";
 	
@@ -126,7 +138,8 @@ void create_processes_information(int aux_semid){
 		(*(process_list[i]))->params->shm_segment_size = sizeof(struct status);
 		(*(process_list[i]))->params->unique_id = getpid();
 		(*(process_list[i]))->params->msg_type = PROGRAM_STATUS;
-		(*(process_list[i]))->params->shmem_name = shmem + i;
+		(*(process_list[i]))->params->rd_sem = sem_cur + (i*2);
+		(*(process_list[i]))->params->wr_sem = sem_cur + (i*2) + 1;
 		(*(process_list[i]))->params->semid = aux_semid;
 		(*(process_list[i]))->params->sockfd = -1;
 		(*(process_list[i]))->params->client_sockfd = -1;
