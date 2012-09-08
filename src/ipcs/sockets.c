@@ -114,7 +114,7 @@ int ipc_receive(ipc_params_t params, void * buffer, int size){
 }
 
 void ipc_destroy(ipc_params_t params){
-
+	close(params->sockfd);
 }
 
 
