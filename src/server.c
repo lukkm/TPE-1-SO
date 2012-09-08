@@ -94,6 +94,7 @@ main(void)
 			free(read_string);
 			free(thread_info);
 		}
+		sleep(1);
 	}
 	return 0;
 }

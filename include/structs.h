@@ -69,7 +69,8 @@ typedef struct ipc_params{
 	/* SHARED MEMORY PARAMS */
 	
 	int semid;
-	cursor_t shmem_name;
+	cursor_t wr_sem;
+	cursor_t rd_sem;
 	int shm_segment_size;
 	int segment_id;
 	void* shared_memory_address;

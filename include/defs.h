@@ -14,8 +14,10 @@
 #define FALSE 0
 #define TRUE 1
 
-#define SVR_RCV 0
-#define SVR_PAR 1
+#define SVR_RCV_RD 0
+#define SVR_RCV_WR 1
+#define SVR_PAR_RD 2
+#define SVR_PAR_WR 3
 
 #define INC 0
 #define DEC 1
@@ -29,4 +31,4 @@
 #define MAXPRIOR 10
 #define QPERM 0660
 
-#define SEMSET_SIZE 12
+#define SEMSET_SIZE 24

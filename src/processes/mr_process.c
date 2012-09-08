@@ -42,6 +42,7 @@ void* execute_mr (void* structure_params)
 	  par->c_status->cursor = 999;
 	else
           par->c_status->cursor += par->param;
+
 	true_step(par);
 	return NULL;
 }
