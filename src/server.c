@@ -201,8 +201,6 @@ void * run_server_receive(void * params){
 	ipc_create(server_receive_params);
 	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
 	
-	printf("HOLIIIIIIIIIIIIIIS\n");
-	
 	while(1){
 		if(ipc_receive(server_receive_params, &client_final, sizeof(struct status))){
 			client_params = get_params_from_pid(client_final.client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);			

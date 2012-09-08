@@ -30,10 +30,8 @@ int main(void)
 	signal(SIGINT, end_process);
 	
 	while(1)
-		if (ipc_receive(inc_process->params, &c_program, sizeof(struct status)) > 0){
-			printf("Recibi algo wacho, soy inc, INC!!!\n");
+		if (ipc_receive(inc_process->params, &c_program, sizeof(struct status)) > 0)
 			run_process(&c_program, &execute_inc);
-		}
 	return 0;
 }
 
