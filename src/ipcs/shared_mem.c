@@ -61,10 +61,10 @@ void ipc_send(ipc_params_t params, void * message, int size)
 	//printf("%d\n", ((client_header_t)message)->client_id);
 	//printf("%d\n", ((client_header_t)message)->program_size);
 	
+	printf("%d %d\n", params->shmem_name, semctl(params->semid, params->shmem_name, GETVAL));
+
 	//sem_wait(params->semid, params->shmem_name);
-	//sem_post(params->semid, params->shmem_name);
-	//printf("pasa\n");
-	
+
 	sem_consume(params->semid, params->shmem_name);
 	
 	memcpy(params->shared_memory_address, message, size);
@@ -80,17 +80,18 @@ int ipc_receive(ipc_params_t params, void * buffer, int size)
 {	
 	//printf("%d %d\n", params->shmem_name, semctl(params->semid, params->shmem_name, GETVAL));
 	
-	if ( !semctl(params->semid, params->shmem_name, GETVAL) )
+	if ( semctl(params->semid, params->shmem_name, GETVAL) >= 0 )
 		return 0;
-		
 	//printf("%d %d %d\n", semctl(params->semid, params->shmem_name, GETVAL), params->semid, params->shmem_name);
 		
 	memcpy(buffer, params->shared_memory_address, size);
 	
+	sem_post(params->semid, params->shmem_name);
+	
 	//printf("%d\n", ((client_header_t)params->shared_memory_address)->client_id);
 	//printf("%d\n", ((client_header_t)params->shared_memory_address)->program_size);
 	
-	sem_consume(params->semid, params->shmem_name);
+	//sem_consume(params->semid, params->shmem_name);
 	
 	//printf("%d %d %d\n", semctl(params->semid, params->shmem_name, GETVAL), params->semid, params->shmem_name);
 	
@@ -114,7 +115,7 @@ void sem_post(int semid, cursor_t shmem_name)
 	
 	sem.sem_num = shmem_name;
 	sem.sem_op = 1;
-	sem.sem_flg = 0;
+	sem.sem_flg = SEM_UNDO;
 	
 	semop( semid, &sem, 1 );
 }
@@ -125,7 +126,7 @@ void sem_consume(int semid, cursor_t shmem_name)
 	
 	sem.sem_num = shmem_name;
 	sem.sem_op = -1;
-	sem.sem_flg = 0;
+	sem.sem_flg = SEM_UNDO;
 	
 	semop( semid, &sem, 1 );
 }

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <sys/sem.h>
 #include <sys/types.h>
+#include <stdio.h>
 
 #include "../../include/structs.h"
 #include "../../include/defs.h"
@@ -37,6 +38,10 @@ int init_sem(){
 	
 	for ( i = 0; i < SEMSET_SIZE; i++ )
 		semctl(semid, i, SETVAL, 0);
+		
+	for ( i = 0; i < SEMSET_SIZE; i++ )
+		printf("%d ", semctl(semid, i, GETVAL));
+	printf("\n");
 	
 	return semid;
 }
