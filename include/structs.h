@@ -90,6 +90,7 @@ typedef struct ipc_params{
 	char* socket_name;
 	unsigned int sockfd;
 	unsigned int client_sockfd;
+	unsigned int socklistener;
 
 	/*------------------*/
 

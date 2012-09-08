@@ -45,6 +45,7 @@ graph_t create_sh_graph(graph_t, int, int*, shared_graph_header_t);
 int get_graph_size(graph_t);
 void * run_program(void * program_name);
 void server_close();
+void * run_server_receive(void * params);
 
 struct thread_status{
 	char * file;
@@ -58,10 +59,8 @@ main(void)
 	char * read_string;
 	int aux_size;
 	
-	pthread_t thread_id;
+	pthread_t thread_id, receive_thread_id;
 	thread_status_t thread_info;
-	ipc_params_t client_params;
-	status client_final;
 	
 	init_processes();
 	init();
@@ -69,6 +68,8 @@ main(void)
 	signal(SIGINT, server_close);
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
+	
+	pthread_create(&receive_thread_id, NULL, &run_server_receive, NULL);
 	
 	printf("Running server...\n");
 	
@@ -92,14 +93,6 @@ main(void)
 			pthread_join(thread_id, NULL);
 			free(read_string);
 			free(thread_info);
-		}
-		if(ipc_receive(server_receive_params, &client_final, sizeof(struct status))){
-			
-			client_params = get_params_from_pid(client_final.client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);
-			
-			ipc_open(client_params, O_WRONLY);
-			ipc_send(client_params, &client_final, sizeof(struct status));
-			ipc_close(client_params);
 		}
 	}
 	return 0;
@@ -130,7 +123,7 @@ void * run_program(void * program_stat)
 		
 		process_type = c_graph->first->instruction_process->instruction_type;
 		client_program.mtype = process_type->params->unique_mq_id;
-		
+		printf("Mandando primera instruccion...\n");
 		ipc_send(process_type->params, &client_program, sizeof(struct status));
 	}else{
 		printf("Entrada incorrecta\n");
@@ -148,9 +141,6 @@ void init()
 	
 	ipc_create(server_params);
 	ipc_open(server_params, O_RDONLY);
-	
-	ipc_create(server_receive_params);
-	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
 		
@@ -174,6 +164,7 @@ void init()
 				break;
 		}
 		(*(process_list[i]))->params->unique_id = pid;
+		(*process_list[i])->params->socklistener = TRUE;
 		ipc_create((*process_list[i])->params);	
 		ipc_open((*(process_list[i]))->params, O_WRONLY);
 	}
@@ -199,4 +190,25 @@ void server_close(){
 
 	printf("Server closed.\n");
 	exit(0);
+}
+
+
+void * run_server_receive(void * params){
+	
+	ipc_params_t client_params;
+	status client_final;
+	
+	ipc_create(server_receive_params);
+	ipc_open(server_receive_params, O_RDONLY|O_NONBLOCK);
+	
+	while(1){
+		if(ipc_receive(server_receive_params, &client_final, sizeof(struct status))){
+			client_params = get_params_from_pid(client_final.client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);			
+			client_params->socklistener = TRUE;
+			ipc_open(client_params, O_WRONLY);
+			ipc_send(client_params, &client_final, sizeof(struct status));
+			ipc_close(client_params);
+		}
+		sleep(1);
+	}
 }

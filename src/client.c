@@ -30,6 +30,8 @@ int main(int argc, char ** argv){
 	header->program_size = strlen(program_name);
 	header->client_id = getpid();
 
+	server_params->socklistener = 1;
+
 	ipc_open(server_params, O_WRONLY);
 	
 	server_params->msg_type = PRE_HEADER;

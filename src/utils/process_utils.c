@@ -50,10 +50,6 @@ void take_next_step(process_params_t par)
 
 	graph_t sh_graph = par->sh_graph;
 
-	//pthread_mutex_lock(&mutex);
-
-	//printf("File: %s, pointer: %p\n",new_file, sh_graph->current);	
-	
 	if (sh_graph->current != NULL) {
 		file = sh_graph->current->instruction_process->
 					instruction_type->params->file;
@@ -70,6 +66,7 @@ void take_next_step(process_params_t par)
 		call_next_process(*par->c_status, &next_process_params);
 		free(next_process_params.file);
 	}else{		
+		server_receive_params->socklistener = TRUE;
 		call_next_process(*par->c_status, server_receive_params);	
 		shmctl(par->c_status->g_header.fd, IPC_RMID, 0);
 	}
@@ -124,20 +121,14 @@ void * call_function(void * v_params)
 	void * (*exec_func) (void *) = 
 							((call_params_t)v_params)->v_execute_func;
 	
-	//pthread_mutex_lock(&mutex);
-
 	if ( (long)(mem = (graph_t)shmat(c_status->g_header.fd, 
 							c_status->g_header.mem_adress, 0)) == -1 )
 		fatal("shmat");
 
-	//thread_args = pre_execute(c_status, mem);
-	//pthread_mutex_unlock(&mutex);
 	func_params = pre_execute(c_status, mem);
 	exec_func(func_params);
 	free(func_params);
 	pthread_exit(0);
-	//pthread_create(&thread_id, NULL, exec_func, thread_args);
-	//func(thread_args);
 }
 
 ipc_params_t get_params_from_pid(int pid, int type, int shm_size, int aux_semid)
@@ -149,6 +140,7 @@ ipc_params_t get_params_from_pid(int pid, int type, int shm_size, int aux_semid)
 	params->unique_id = pid;
 	params->msg_type = type;
 	params->shm_segment_size = shm_size;
+	params->sockfd = -1;
 	
 	while(aux > 0)
 	{
