@@ -70,7 +70,7 @@ void take_next_step(process_params_t par)
 		call_next_process(*par->c_status, server_receive_params);	
 		shmctl(par->c_status->g_header.fd, IPC_RMID, 0);
 	}
-	//pthread_mutex_unlock(&mutex);
+
 }
 
 void false_step(process_params_t par)
@@ -107,7 +107,7 @@ void run_process(status_t c_status, void * (* execute_func) (void *))
 	}
 	pthread_join(thread_id, NULL);
 	free(v_params);
-	//call_function(&v_params);
+	
 }
 
 void * call_function(void * v_params)

@@ -1,3 +1,9 @@
+/*
+ * 
+ * Parametros generales del programa
+ * 
+ * */
+
 #define CANT_INSTRUCTIONS 9
 #define MAX_INSTRUCTION_LENGTH 100
 #define MEM_SIZE 1000
@@ -19,6 +25,11 @@
 #define SVR_PAR_RD 2
 #define SVR_PAR_WR 3
 
+
+/*
+ * Valores arbitrarios definidos para cada instruccion/proceso
+ * 
+ * */
 #define INC 0
 #define DEC 1
 #define MR 2
