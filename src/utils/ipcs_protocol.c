@@ -37,6 +37,7 @@ int init_sem(int sem_doinit){
 		exit(1);
 		
 	if(sem_doinit){
+		printf("init\n");
 		for ( i = 0; i < SEMSET_SIZE; i++ )
 		{
 			if (i % 2 == 0)

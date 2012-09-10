@@ -32,18 +32,18 @@ all:
 
 	gcc -g -o bin/mqueue/client src/client.c src/ipcs/mqueue.c src/utils/process_utils.c src/utils/ipcs_protocol.c -lpthread
 	
-	gcc -g -o bin/shmem/server src/server.c src/utils/parser.c src/data_structures/graph.c src/data_structures/stack.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c src/utils/shmem_graph.c -lpthread
-	gcc -g -o bin/shmem/inc src/processes/inc_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/dec src/processes/dec_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/mr src/processes/mr_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/ml src/processes/ml_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/cz src/processes/cz_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/if src/processes/if_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/endif src/processes/endif_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/while src/processes/while_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
-	gcc -g -o bin/shmem/endwhile src/processes/endwhile_process.c src/ipcs/shared_mem.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/server src/server.c src/utils/parser.c src/data_structures/graph.c src/data_structures/stack.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c src/utils/shmem_graph.c -lpthread
+	gcc -g -o bin/shmem/inc src/processes/inc_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/dec src/processes/dec_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/mr src/processes/mr_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/ml src/processes/ml_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/cz src/processes/cz_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/if src/processes/if_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/endif src/processes/endif_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/while src/processes/while_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
+	gcc -g -o bin/shmem/endwhile src/processes/endwhile_process.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
 
-	gcc -g -o bin/shmem/client src/client.c src/ipcs/shared_mem.c src/utils/process_utils.c src/utils/ipcs_protocol.c -lpthread
+	gcc -g -o bin/shmem/client src/client.c src/ipcs/shared_mem.c src/utils/semaphore.c src/utils/process_utils.c src/utils/ipcs_protocol.c -lpthread
 	
 	gcc -g -o bin/sockets/server src/server.c src/utils/parser.c src/data_structures/graph.c src/data_structures/stack.c src/ipcs/sockets.c src/utils/ipcs_protocol.c src/utils/process_utils.c src/utils/shmem_graph.c -lpthread
 	gcc -g -o bin/sockets/inc src/processes/inc_process.c src/ipcs/sockets.c src/utils/ipcs_protocol.c src/utils/process_utils.c -lpthread
