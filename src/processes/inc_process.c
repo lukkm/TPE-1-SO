@@ -23,15 +23,17 @@ int main(void)
 {
 	status c_program;
 	
-	init_processes();
+	init_processes(FALSE);
 	
 	ipc_open(inc_process->params, O_RDONLY);
 	
 	signal(SIGINT, end_process);
 	
 	while(1)
-		if (ipc_receive(inc_process->params, &c_program, sizeof(struct status)) > 0)
+		if (ipc_receive(inc_process->params, &c_program, sizeof(struct status)) > 0){
 			run_process(&c_program, &execute_inc);
+			//printf("do inc\n");
+		}
 	return 0;
 }
 

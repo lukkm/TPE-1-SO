@@ -24,15 +24,17 @@ int main(void)
 {
 	status c_program;
 	
-	init_processes();
+	init_processes(FALSE);
 	
 	signal(SIGINT, end_process);
 	
 	ipc_open(while_process->params, O_RDONLY);
 	
 	while(1)
-		if (ipc_receive(while_process->params, &c_program, sizeof(struct status)) > 0)
+		if (ipc_receive(while_process->params, &c_program, sizeof(struct status)) > 0){
 			run_process(&c_program, &execute_while);
+			//printf("do while\n");
+		}
 	return 0;
 }
 

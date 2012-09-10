@@ -1,6 +1,3 @@
-/* Despues moverlo a un archivo con los defines */
-/*Alan*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,8 +5,6 @@
 #include "../../include/structs.h"
 #include "../../include/data_structures/stack.h"
 #include "../../include/defs.h"
-
-/* Include "processes.h" */
 
 #define CLEAN_LINE int i;for(i=0;i<MAX_INSTRUCTION_LENGTH;i++)line[i]=0;
 

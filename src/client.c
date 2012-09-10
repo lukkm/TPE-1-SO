@@ -17,7 +17,7 @@ int main(int argc, char ** argv){
 	int i;
 	ipc_params_t client_params;
 
-	init_processes();
+	init_processes(FALSE);
 
 	if(argc > 1){
 		program_name = argv[1];
@@ -35,7 +35,7 @@ int main(int argc, char ** argv){
 	ipc_open(server_params, O_WRONLY);
 	
 	server_params->msg_type = PRE_HEADER;
-	printf("%d %d\n", server_params->wr_sem, server_params->rd_sem);
+	//printf("%d %d\n", server_params->wr_sem, server_params->rd_sem);
 	ipc_send(server_params, header, sizeof(struct client_header));
 	
 	//free(header);

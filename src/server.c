@@ -64,7 +64,7 @@ main(void)
 	
 	signal(SIGINT, server_close);
 	
-	init_processes();
+	init_processes(TRUE);
 	init();
 	
 	client_header_t header = calloc(1, sizeof(struct client_header));
@@ -79,12 +79,12 @@ main(void)
 		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0)
 		{
 			read_string = calloc(1, header->program_size);
-			printf("%d %d\n", header->program_size, header->client_id);
+			//printf("%d %d\n", header->program_size, header->client_id);
 			server_params->msg_type = PROGRAM_STRING;
 			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
 				sleep(1);
-			printf("Recibi programa del cliente: %d, programa: %s\n", 
+			printf("Received program from client: %d, program name: %s\n", 
 										header->client_id, read_string);
 			thread_info = calloc(1, sizeof(struct thread_status));
 			thread_info->file = read_string;
@@ -125,12 +125,13 @@ void * run_program(void * program_stat)
 		
 		process_type = c_graph->first->instruction_process->instruction_type;
 		client_program.mtype = process_type->params->unique_mq_id;
-		printf("Mandando primera instruccion...\n");
+		printf("Sending first instruction...\n");
 		ipc_send(process_type->params, &client_program, sizeof(struct status));
 	}else{
 		client_params = get_params_from_pid(thread_info->client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);			
 		client_params->socklistener = TRUE;
 		client_program.flag = -1;
+		printf("Answering to client: %d\n", thread_info->client_id);
 		ipc_open(client_params, O_WRONLY);
 		ipc_send(client_params, &client_program, sizeof(struct status));
 		ipc_close(client_params);
@@ -151,6 +152,9 @@ void init()
 	
 	ipc_create(server_params);
 	ipc_open(server_params, O_RDONLY);
+	
+	aux_semid = init_sem();
+	
 	
 	for(i = 0; i < CANT_INSTRUCTIONS; i++){
 		
@@ -216,6 +220,7 @@ void * run_server_receive(void * params){
 		if(ipc_receive(server_receive_params, &client_final, sizeof(struct status))){
 			client_params = get_params_from_pid(client_final.client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);			
 			client_params->socklistener = TRUE;
+			printf("Answering to client: %d\n", client_final.client_id);
 			ipc_open(client_params, O_WRONLY);
 			ipc_send(client_params, &client_final, sizeof(struct status));
 			ipc_close(client_params);

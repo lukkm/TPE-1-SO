@@ -21,7 +21,7 @@ int main(void)
 {
 	status c_program;
 	
-	init_processes();
+	init_processes(FALSE);
 	
 	signal(SIGINT, end_process);
 	

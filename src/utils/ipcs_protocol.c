@@ -29,36 +29,38 @@ ipc_params_t server_params;
 process_t * process_list[CANT_INSTRUCTIONS];
 char * process_name_list[CANT_INSTRUCTIONS];
 
-int init_sem(){
+int init_sem(int sem_doinit){
 	
 	int semid, i;
 	
 	if ( (semid = semget(190690, SEMSET_SIZE, IPC_CREAT | 0666)) == -1 )
 		exit(1);
-	
-	for ( i = 0; i < SEMSET_SIZE; i++ )
-	{
-		if (i % 2 == 0)
-			semctl(semid, i, SETVAL, 1);
-		else
-			semctl(semid, i, SETVAL, 0);
+		
+	if(sem_doinit){
+		for ( i = 0; i < SEMSET_SIZE; i++ )
+		{
+			if (i % 2 == 0)
+				semctl(semid, i, SETVAL, 1);
+			else
+				semctl(semid, i, SETVAL, 0);
+		}
 	}
 		
-	for ( i = 0; i < SEMSET_SIZE; i++ )
+	/*for ( i = 0; i < SEMSET_SIZE; i++ )
 		printf("%d ", semctl(semid, i, GETVAL));
-	printf("\n");
+	printf("\n");*/
 	
 	return semid;
 }
 
-void init_processes(){
+void init_processes(int sem_doinit){
 	
 	int i, aux_semid;
 	
 	char * ct_sv_rec_params = "/tmp/sv_receive";
 	char * ct_sv_params = "/tmp/server";
 	
-	aux_semid = init_sem();
+	aux_semid = init_sem(sem_doinit);
 	
 	server_receive_params = calloc(1, sizeof(struct ipc_params));
 	server_receive_params->file = calloc(1, strlen(ct_sv_rec_params) + 1);
