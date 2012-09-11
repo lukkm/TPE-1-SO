@@ -128,7 +128,8 @@ void * run_program(void * program_stat)
 			
 			process_type = c_graph->first->instruction_process->instruction_type;
 			client_program.mtype = process_type->params->unique_mq_id;
-			//free_graph(c_graph);
+			free_graph(c_graph);
+			free_stack(instruction_stack);
 			printf("Sending first instruction...\n");
 			ipc_send(process_type->params, &client_program, sizeof(struct status));
 		}else{
@@ -227,6 +228,8 @@ void * run_server_receive(void * params){
 			ipc_open(client_params, O_WRONLY);
 			ipc_send(client_params, &client_final, sizeof(struct status));
 			ipc_close(client_params);
+			free(client_params->file);
+			free(client_params);
 		}
 		sleep(1);
 	}
@@ -244,5 +247,7 @@ void answer_error_to_client(int err_code, int client_id){
 	ipc_open(client_params, O_WRONLY);
 	ipc_send(client_params, &client_program, sizeof(struct status));
 	ipc_close(client_params);
+	free(client_params->file);
+	free(client_params);
 	
 }

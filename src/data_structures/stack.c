@@ -39,3 +39,12 @@ int is_empty(mstack_t c_stack){
 		return TRUE;
 	return c_stack->size == 0;
 }
+
+void free_stack(mstack_t c_stack){
+	stack_node c_stack_node;
+	while(!is_empty(c_stack)){
+		c_stack_node = pop(c_stack);
+		free(c_stack_node);
+	}
+	free(c_stack);
+}

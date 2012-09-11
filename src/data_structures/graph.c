@@ -77,6 +77,7 @@ graph_t build_graph(mstack_t instructions)
         }
             
         new_graph->first = new_node;
+        free(aux_node);
     }
     if (!is_empty(aux_node_stack))
 		return NULL;
@@ -158,34 +159,39 @@ int get_graph_size(graph_t c_graph)
 	return get_node_size(c_graph->first) + sizeof(graph);
 }
 
+void free_node_space(node_t c_node, int is_conditional){
+	if(is_conditional)
+		free(c_node->instruction_process->expr);
+	free(c_node->instruction_process);
+	free(c_node);
+}
+
 void free_node(node_t c_node){
-	int instr_type = c_node->instruction_process->instruction_type->type;
 	if(c_node == NULL)
 		return;
+	int instr_type = c_node->instruction_process->instruction_type->type;
 	if(instr_type == IF || instr_type == WHILE){
 		if(!c_node->cond_executed){
-			free_node(c_node->conditional_expr);
 			c_node->cond_executed = 1;
+			free_node(c_node->conditional_expr);
 		}else{
 			if(instr_type == WHILE){
 				if(!c_node->while_executed){
-					free_node(c_node->true_node);
 					c_node->while_executed = 1;
+					free_node(c_node->true_node);
 				}else{
 					free_node(c_node->false_node);
-					c_node->while_executed = 0;
+					free_node_space(c_node, TRUE);
 				}
 			}else{
 				free_node(c_node->true_node);
+				free_node_space(c_node, TRUE);
 			}
-			c_node->cond_executed = 0;
 		}
-		free(c_node->instruction_process->expr);
 	}else{
 		free_node(c_node->true_node);
+		free_node_space(c_node, FALSE);
 	}
-	free(c_node->instruction_process);
-	free(c_node);
 }
 
 void free_graph(graph_t c_graph){

@@ -32,3 +32,11 @@ stack_node pop(mstack_t stack);
  * */
 int is_empty(mstack_t stack);
 
+/*
+ * 
+ * Libera el espacio reservado para el stack asi como para todos sus nodos internos
+ * 
+ * */
+
+void free_stack(mstack_t c_stack);
+
