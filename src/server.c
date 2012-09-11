@@ -46,6 +46,7 @@ int get_graph_size(graph_t);
 void * run_program(void * program_name);
 void server_close();
 void * run_server_receive(void * params);
+void answer_error_to_client(int err_code, int client_id);
 
 struct thread_status{
 	char * file;
@@ -79,7 +80,6 @@ main(void)
 		if(ipc_receive(server_params, header, sizeof (struct client_header)) > 0)
 		{
 			read_string = calloc(1, header->program_size);
-			//printf("%d %d\n", header->program_size, header->client_id);
 			server_params->msg_type = PROGRAM_STRING;
 			
 			while(ipc_receive(server_params, read_string, header->program_size) == 0)
@@ -105,36 +105,39 @@ void * run_program(void * program_stat)
 	int memkey, i;
 	status client_program;
 	process_t process_type;
-	ipc_params_t client_params;
+	mstack_t instruction_stack;
 	
 	thread_status_t thread_info = (thread_status_t)program_stat;
 
-	c_graph = build_graph(parse_file((char*)thread_info->file));
+	instruction_stack = parse_file((char*)thread_info->file);	
 
-	if (c_graph != NULL)
-	{
-		create_sh_graph(c_graph, get_graph_size(c_graph), 
-						&memkey, &client_program.g_header);
-		client_program.cursor = 0;
-		client_program.flag = FALSE;
-		client_program.client_id = thread_info->client_id;
-		
-		for(i = 0; i < MEM_SIZE; i++){
-			client_program.mem[i] = 0;
+	if (instruction_stack != NULL){
+	
+		c_graph = build_graph(instruction_stack);
+
+		if (c_graph != NULL)
+		{
+			create_sh_graph(c_graph, get_graph_size(c_graph), 
+							&memkey, &client_program.g_header);
+			client_program.cursor = 0;
+			client_program.flag = FALSE;
+			client_program.client_id = thread_info->client_id;
+			
+			for(i = 0; i < MEM_SIZE; i++){
+				client_program.mem[i] = 0;
+			}
+			
+			process_type = c_graph->first->instruction_process->instruction_type;
+			client_program.mtype = process_type->params->unique_mq_id;
+			printf("Sending first instruction...\n");
+			ipc_send(process_type->params, &client_program, sizeof(struct status));
+		}else{
+			answer_error_to_client(UNABLE_TO_BUILD_GRAPH, thread_info->client_id); 
 		}
-		
-		process_type = c_graph->first->instruction_process->instruction_type;
-		client_program.mtype = process_type->params->unique_mq_id;
-		printf("Sending first instruction...\n");
-		ipc_send(process_type->params, &client_program, sizeof(struct status));
 	}else{
-		client_params = get_params_from_pid(thread_info->client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);			
-		client_params->socklistener = TRUE;
-		client_program.flag = -1;
-		printf("Answering to client: %d\n", thread_info->client_id);
-		ipc_open(client_params, O_WRONLY);
-		ipc_send(client_params, &client_program, sizeof(struct status));
-		ipc_close(client_params);
+		
+		answer_error_to_client(errno, thread_info->client_id);
+		errno = 0;
 	}
 	pthread_exit(NULL);
 }
@@ -227,4 +230,19 @@ void * run_server_receive(void * params){
 		}
 		sleep(1);
 	}
+}
+
+void answer_error_to_client(int err_code, int client_id){
+	
+	ipc_params_t client_params;
+	status client_program;
+	
+	client_params = get_params_from_pid(client_id, PROGRAM_STATUS, sizeof(struct status), server_params->semid);			
+	client_params->socklistener = TRUE;
+	client_program.flag = err_code;
+	printf("Answering to client: %d\n", client_id);
+	ipc_open(client_params, O_WRONLY);
+	ipc_send(client_params, &client_program, sizeof(struct status));
+	ipc_close(client_params);
+	
 }

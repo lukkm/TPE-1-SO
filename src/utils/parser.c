@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "../../include/structs.h"
 #include "../../include/data_structures/stack.h"
@@ -37,11 +38,13 @@ extern process_t endwhile_process;
 mstack_t parse_file(char * file_adress){
 	FILE * file;
 	char c;
-	int i;
+	int i, lines = 1;
 	set_lists();
 	file = fopen(file_adress, "r");
-	if (file == NULL)
+	if (file == NULL){
+		errno = FILE_NOT_FOUND;
 		return NULL;
+	}
 	mstack_t stack = create_stack();
 	char * line = calloc(MAX_INSTRUCTION_LENGTH, sizeof(char));
 	while(!feof(file)){
@@ -50,8 +53,11 @@ mstack_t parse_file(char * file_adress){
 			line[i++] = c;
 		}
 		line[i] = 0;
-		if(*line != 0 && parse_string(line, stack) == -1)
+		if(*line != 0 && parse_string(line, stack) == -1){
+			errno = (lines * -1) - 2;
 			return NULL;
+		}
+		lines++;
 		CLEAN_LINE;
 	}
 	free(line);

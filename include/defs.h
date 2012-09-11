@@ -43,3 +43,12 @@
 #define QPERM 0660
 
 #define SEMSET_SIZE 24
+
+/*
+ * 
+ * Codigos de error
+ * 
+ * */
+
+#define FILE_NOT_FOUND -1
+#define UNABLE_TO_BUILD_GRAPH -2
