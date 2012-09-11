@@ -40,7 +40,7 @@ int init_sem(int sem_doinit){
 		printf("init\n");
 		for ( i = 0; i < SEMSET_SIZE; i++ )
 		{
-			if (i % 2 == 0)
+			if (i % 2 != 0)
 				semctl(semid, i, SETVAL, 1);
 			else
 				semctl(semid, i, SETVAL, 0);
