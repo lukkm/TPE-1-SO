@@ -73,6 +73,8 @@ int main(int argc, char ** argv){
 		}
 		
 		ipc_destroy(client_params);
+		
+		printf("\n");
 	}
 
 	return 0;
