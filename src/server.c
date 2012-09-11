@@ -18,6 +18,7 @@
 #include "../include/data_structures/graph.h"
 #include "../include/data_structures/stack.h"
 #include "../include/utils/process_utils.h"
+#include "../include/utils/shmem_graph.h"
 #include "../include/ipcs/ipcs.h"
 #include "../include/utils/ipcs_protocol.h"
 
@@ -41,8 +42,6 @@ sem_t sem;
 
 void init(void);
 void fatal(char *s);
-graph_t create_sh_graph(graph_t, int, int*, shared_graph_header_t);
-int get_graph_size(graph_t);
 void * run_program(void * program_name);
 void server_close();
 void * run_server_receive(void * params);
@@ -129,6 +128,7 @@ void * run_program(void * program_stat)
 			
 			process_type = c_graph->first->instruction_process->instruction_type;
 			client_program.mtype = process_type->params->unique_mq_id;
+			//free_graph(c_graph);
 			printf("Sending first instruction...\n");
 			ipc_send(process_type->params, &client_program, sizeof(struct status));
 		}else{

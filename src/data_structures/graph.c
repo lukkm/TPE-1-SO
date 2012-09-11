@@ -157,3 +157,38 @@ int get_graph_size(graph_t c_graph)
 {	
 	return get_node_size(c_graph->first) + sizeof(graph);
 }
+
+void free_node(node_t c_node){
+	int instr_type = c_node->instruction_process->instruction_type->type;
+	if(c_node == NULL)
+		return;
+	if(instr_type == IF || instr_type == WHILE){
+		if(!c_node->cond_executed){
+			free_node(c_node->conditional_expr);
+			c_node->cond_executed = 1;
+		}else{
+			if(instr_type == WHILE){
+				if(!c_node->while_executed){
+					free_node(c_node->true_node);
+					c_node->while_executed = 1;
+				}else{
+					free_node(c_node->false_node);
+					c_node->while_executed = 0;
+				}
+			}else{
+				free_node(c_node->true_node);
+			}
+			c_node->cond_executed = 0;
+		}
+		free(c_node->instruction_process->expr);
+	}else{
+		free_node(c_node->true_node);
+	}
+	free(c_node->instruction_process);
+	free(c_node);
+}
+
+void free_graph(graph_t c_graph){
+	free_node(c_graph->first);
+	free(c_graph);
+}

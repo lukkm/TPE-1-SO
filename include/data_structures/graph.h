@@ -6,6 +6,7 @@
  * */
 
 graph_t build_graph(mstack_t instructions);
+int get_graph_size(graph_t);
 
 
 
