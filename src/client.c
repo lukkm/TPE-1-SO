@@ -18,6 +18,8 @@ int main(int argc, char ** argv){
 	ipc_params_t client_params;
 
 	init_processes(FALSE);
+	
+	printf("\n");
 
 	if(argc <= 1){
 		printf("Wrong entry, too few arguments\n");

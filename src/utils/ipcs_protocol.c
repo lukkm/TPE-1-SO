@@ -37,7 +37,6 @@ int init_sem(int sem_doinit){
 		exit(1);
 		
 	if(sem_doinit){
-		printf("init\n");
 		for ( i = 0; i < SEMSET_SIZE; i++ )
 		{
 			if (i % 2 != 0)
@@ -46,10 +45,6 @@ int init_sem(int sem_doinit){
 				semctl(semid, i, SETVAL, 0);
 		}
 	}
-		
-	/*for ( i = 0; i < SEMSET_SIZE; i++ )
-		printf("%d ", semctl(semid, i, GETVAL));
-	printf("\n");*/
 	
 	return semid;
 }
